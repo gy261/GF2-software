@@ -49,8 +49,12 @@ class Scanner:
     Public methods
     -------------
     get_symbol(self): Translates the next sequence of characters into a symbol
-                      and returns the symbol.
+                      and returns the symbol, with white spaces skipped.
     
+    get_exact_symbol(self): Translate the next sequence of characters into a symbol.
+                            Without skipping any spaces. So a SPACE type symbol is 
+                            possible.
+
     display_error(self, error_message): Prints out the error_message when an error
                     occurs, along with the text line and the exact position of the
                     symbol that causes the error.
@@ -71,15 +75,13 @@ class Scanner:
             sys.exit()
         else: 
             self.file_lines = file.readlines()  # Stores all the lines of the text file
-            # print(self.file_lines)
-
             file.seek(0,0)
             self.file = file
 
         self.symbol_type_list = [
             self.KEYWORD, self.NUMBER, self.HEADING, self.NAME, self.COMMA, self.ARROW,
-            self.SEMICOLON, self.COLON, self.DOT, self.EQUAL, self.PIN, self.EOF
-        ] = range(12)
+            self.SEMICOLON, self.COLON, self.DOT, self.EQUAL, self.PIN, self.SPACE, self.EOF
+        ] = range(13)
 
         self.heading_list = ["DEVICE", "CONNECTION", "MONITOR"]
 
@@ -113,6 +115,7 @@ class Scanner:
         self.cur_pos = 0
         self.num_error = 0
         self.names.display_list()
+
     def skip_spaces(self):
         """Skip through all the spaces and newlines until reaching a non-space character."""
         # print("current cha skip_space:")
@@ -172,6 +175,84 @@ class Scanner:
 
             [symbol.id] = self.names.lookup([name_string])
             
+
+        elif self.cur_character.isdigit():
+            num_string = self.get_number()
+            [symbol.id] = self.names.lookup([num_string])
+            symbol.type = self.NUMBER
+            # print("The symbol is a number:", symbol.id)
+
+        elif self.cur_character == ",":
+            symbol.type = self.COMMA
+            self.advance()
+            # print("The symbol is a comma")
+
+        elif self.cur_character == ";":
+            symbol.type = self.SEMICOLON
+            self.advance()
+            # print("The symbol is a semicolon")
+
+        elif self.cur_character == ":":
+            symbol.type = self.COLON
+            self.advance()
+            # print("The symbol is a colon")
+
+        elif self.cur_character == ".":
+            symbol.type = self.DOT
+            self.advance()
+            # print("The symbol is a dot")
+
+        elif self.cur_character == "=":
+            symbol.type = self.EQUAL
+            self.advance()
+            # print("The symbol is a equal")
+
+        elif self.cur_character == "-":
+            self.advance()
+            if self.cur_character == ">":
+                symbol.type = self.ARROW
+                self.advance()
+                # print("The symbol is an arrow")
+            else:
+                raise SyntaxError("Arrow symbol should be in the form of ->")
+
+        elif self.cur_character == "":
+            symbol.type = self.EOF
+            # print("The symbol is a EOF")
+
+        else:
+            raise SyntaxError("Invalid character encountered!")
+
+        symbol.line_num = self.cur_line
+
+        return symbol
+
+    def get_exact_symbol(self):
+        """Translate the next sequence of characters into a symbol.
+        Without skipping any spaces. So a SPACE type symbol is possible.
+        """
+        symbol = Symbol()
+        # print("################ NEW SYMBOL ##################")
+        # print("current cha:", self.cur_character)
+
+        if self.cur_character.isalpha():  # name
+            name_string = self.get_name()
+            # print("The symbol is:", name_string)
+            if name_string in self.keyword_list:
+                symbol.type = self.KEYWORD
+            elif name_string in self.heading_list:
+                symbol.type = self.HEADING
+            elif name_string in self.pin_list:
+                symbol.type = self.PIN
+            else:
+                symbol.type = self.NAME
+
+            [symbol.id] = self.names.lookup([name_string])
+
+        elif self.cur_character.isspace():
+            symbol.type = self.SPACE
+            self.advance()
+            # print("The symbol is a space")
 
         elif self.cur_character.isdigit():
             num_string = self.get_number()
