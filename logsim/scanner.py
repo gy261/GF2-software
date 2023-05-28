@@ -113,6 +113,7 @@ class Scanner:
         self.cur_character = " "
         self.cur_line = 1
         self.cur_pos = 0
+        self.prev_pos = -1      # Used for error message pointer '^'
         self.num_error = 0
         self.names.display_list()
 
@@ -125,6 +126,7 @@ class Scanner:
     def advance(self):
         """Read the next character from the definition file and place it in cur_character."""
         # print("ADVANCING:",self.cur_character)
+        self.prev_pos = self.cur_pos
         self.cur_pos += 1
         self.cur_character = self.file.read(1)
         # print("AFTER ADVANCING:",self.cur_character)
@@ -224,7 +226,7 @@ class Scanner:
             raise SyntaxError("Invalid character encountered!")
 
         symbol.line_num = self.cur_line
-
+        # print("Current position:",self.cur_pos)
         return symbol
 
     def get_exact_symbol(self):
@@ -311,11 +313,18 @@ class Scanner:
 
         if not isinstance(error_message, str):
             raise TypeError("error_message must be a string!")
+        
+        if self.cur_pos == 0:
+            line_of_text = self.file_lines[self.cur_line - 2]
+            error_line_num = str(self.cur_line - 1)
+            
+        else:
+            line_of_text = self.file_lines[self.cur_line - 1]
+            error_line_num = str(self.cur_line)
 
-        line_of_text = self.file_lines[self.cur_line - 1]
         output_message = (
-            "ERROR on line " + str(self.cur_line) + ": " + error_message + "\n" +
-            line_of_text + " " * self.cur_pos + "^"
+            "ERROR on line " + error_line_num + ": " + error_message + "\n" +
+            line_of_text + " " * (self.prev_pos - 1) + "^"
         )
 
         print(output_message)
