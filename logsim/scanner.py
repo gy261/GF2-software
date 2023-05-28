@@ -28,7 +28,8 @@ class Symbol:
         """Initialise symbol properties."""
         self.type = None
         self.id = None
-        self.line_num = 0
+        self.line_num = 0  # The line number of the text file where the symbol is found
+        # self.pos = 0     # The column number of the text file where the symbol is found at its first chracter
 
 
 class Scanner:
@@ -72,6 +73,10 @@ class Scanner:
             else:
                 self.file = file    
 
+                """This file_lines stores all the lines of the text file, which we will use for printing error messages, 
+                 so that we do not have to move the scanner cursor""" 
+                self.file_lines = file.readlines() 
+
         self.symbol_type_list = [self.KEYWORD, self.NUMBER, self.HEADING,\
                     self.NAME, self.COMMA, self.ARROW, self.SEMICOLON, self.COLON, self.DOT,\
                     self.EQUAL,self.PIN, self.EOF] = range(11)
@@ -88,9 +93,14 @@ class Scanner:
         [self.I1_ID, self.I2_ID, self.I3_ID, self.I4_ID, self.I5_ID, self.I6_ID, self.I7_ID, self.I8_ID, self.I9_ID, self.I10_ID, self.I11_ID, self.I12_ID, \
          self.I13_ID, self.I14_ID, self.I15_ID, self.I16_ID, self.Q_ID, self.QBAR_ID, self.DATA_ID, self.CLK_ID, self.SET_ID, self.CLEAR_ID] = self.names.lookup(self.pin_list)
 
-        self.error_count = 0
+        self.num_error = 0
         self.cur_character = ""
         self.cur_line = 1
+        self.cur_pos = 0
+
+        # The below variables are used to store errors, the parser would call the 
+        self.num_error = 0
+        self.error_list = []
     
     def skip_spaces(self):
         # Skip through all the spaces and newlines until reaching a non-space character
@@ -99,9 +109,11 @@ class Scanner:
     
     def advance(self):
         # Read the next character from the definition file and places it in cur_character
+        self.cur_pos += 1
         self.cur_character = self.file.read(1)
         if self.cur_character == "\n":
             self.cur_line += 1
+            self.cur_pos = 0
 
     def get_name(self):
         """ Return the name string (or None) and the next non-alphanumeric character. """
@@ -177,3 +189,24 @@ class Scanner:
 
         return symbol
 
+def display_error(self, error_message):
+    """ This function displays an error message whenever the parser encounters an error;
+        Prints the current text line and a ^ symbol on the next line to highlight the location of the error.
+        Then prints the error message. This function is repeatedly called by the parser. """    
+    
+    self.num_error += 1
+    
+    if not isinstance(error_message, str):
+        raise TypeError("error_message must be a string!")
+
+    line_of_text = self.file_lines[self.cur_line - 1]
+    output_message = "ERROR on line " + str(self.cur_line) + ": " + error_message + "\n" + \
+                    line_of_text + " "*self.cur_pos + "^"
+    
+    print(output_message)
+    
+    
+
+
+    
+    
