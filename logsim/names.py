@@ -64,9 +64,7 @@ class Names:
             if name_string in self.names:
                 return self.names.index(name_string)
             else:
-                return None
-
-            
+                return None           
 
     def lookup(self, name_string_list):
         """Return a list of name IDs for each name string in name_string_list.
@@ -104,3 +102,6 @@ class Names:
                 return self.names[name_id]
             else:
                 return None
+    
+    def display_list(self):
+        print("The current namelist is:", self.names)

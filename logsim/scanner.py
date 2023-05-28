@@ -25,7 +25,7 @@ class Symbol:
     """
 
     def __init__(self):
-        """Initialise symbol properties."""
+        """Initialize symbol properties."""
         self.type = None
         self.id = None
         self.line_num = 0  # The line number of the text file where the symbol is found
@@ -50,101 +50,118 @@ class Scanner:
     -------------
     get_symbol(self): Translates the next sequence of characters into a symbol
                       and returns the symbol.
+    
+    display_error(self, error_message): Prints out the error_message when an error
+                    occurs, along with the text line and the exact position of the
+                    symbol that causes the error.
     """
 
     def __init__(self, path, names):
-        """Open specified file and initialise reserved words and IDs."""
+        """Open specified file and initialize reserved words and IDs."""
+        if not isinstance(names, Names):
+            raise TypeError("Expected names to be an instance of the Names class.")
+        self.names = names
 
-        # Check that the names provided is valid 
-        if isinstance(names, Names):
-            self.names = names
-        else:
-            raise TypeError("Expected names to be a instance of the Names class.")
-        
-        # Check that the path provided is valid
-        if isinstance(path, str):
-            raise TypeError("Expected path name tobe a string.")
-        else:
-            try:
-                file = open(path, "r")
-            except FileNotFoundError:
-                print("The path provided is not found.")
-                sys.exit()
-            else:
-                self.file = file    
+        if not isinstance(path, str):
+            raise TypeError("Expected path name to be a string.")
+        try:
+            file = open(path, "r")
+        except FileNotFoundError:
+            print("The path provided is not found.")
+            sys.exit()
+        else: 
+            self.file_lines = file.readlines()  # Stores all the lines of the text file
+            # print(self.file_lines)
 
-                """This file_lines stores all the lines of the text file, which we will use for printing error messages, 
-                 so that we do not have to move the scanner cursor""" 
-                self.file_lines = file.readlines() 
+            file.seek(0,0)
+            self.file = file
 
-        self.symbol_type_list = [self.KEYWORD, self.NUMBER, self.HEADING,\
-                    self.NAME, self.COMMA, self.ARROW, self.SEMICOLON, self.COLON, self.DOT,\
-                    self.EQUAL,self.PIN, self.EOF] = range(11)
-        
-        self.heading_list = ["DEVICE","CONNECTION","MONITOR"]
-        [self.DEVICE_ID, self.CONNECTION_ID, self.MONITOR_ID] = self.names.lookup(self.heading_list)
+        self.symbol_type_list = [
+            self.KEYWORD, self.NUMBER, self.HEADING, self.NAME, self.COMMA, self.ARROW,
+            self.SEMICOLON, self.COLON, self.DOT, self.EQUAL, self.PIN, self.EOF
+        ] = range(12)
 
-        self.keyword_list = ["NAND", "AND", "OR", "NOR", "XOR", "DTYPE","SWICTH", "CLOCK", "CON", "MON"]
-        [self.NAND_ID, self.AND_ID, self.OR_ID, self.NOR_ID, self.XOR_ID, self.DTYPE_ID, \
-         self.SWITCH_ID, self.CLOCK_ID, self.CON_ID, self.MON_ID] = self.names.lookup(self.keyword_list)
+        self.heading_list = ["DEVICE", "CONNECTION", "MONITOR"]
 
-        self.pin_list = ["I1","I2","I3","I4","I5","I6","I7","I8","I9","I10","I11","I12","I13","I14",\
-                        "I15", "I16", "Q", "QBAR", "DATA", "CLK", "SET", "CLEAR"]
-        [self.I1_ID, self.I2_ID, self.I3_ID, self.I4_ID, self.I5_ID, self.I6_ID, self.I7_ID, self.I8_ID, self.I9_ID, self.I10_ID, self.I11_ID, self.I12_ID, \
-         self.I13_ID, self.I14_ID, self.I15_ID, self.I16_ID, self.Q_ID, self.QBAR_ID, self.DATA_ID, self.CLK_ID, self.SET_ID, self.CLEAR_ID] = self.names.lookup(self.pin_list)
+        [
+            self.DEVICE_ID, self.CONNECTION_ID, self.MONITOR_ID
+        ] = self.names.lookup(self.heading_list)
 
-        self.num_error = 0
-        self.cur_character = ""
+        self.keyword_list = [
+            "NAND", "AND", "OR", "NOR", "XOR", "DTYPE", "SWITCH", "CLOCK", "CON", "MON"
+        ]
+
+        [
+            self.NAND_ID, self.AND_ID, self.OR_ID, self.NOR_ID, self.XOR_ID, self.DTYPE_ID,
+            self.SWITCH_ID, self.CLOCK_ID, self.CON_ID, self.MON_ID
+        ] = self.names.lookup(self.keyword_list)
+
+        self.pin_list = [
+            "I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9", "I10", "I11", "I12", "I13", "I14",
+            "I15", "I16", "Q", "QBAR", "DATA", "CLK", "SET", "CLEAR"
+        ]
+
+        [
+            self.I1_ID, self.I2_ID, self.I3_ID, self.I4_ID, self.I5_ID, self.I6_ID, self.I7_ID,
+            self.I8_ID, self.I9_ID, self.I10_ID, self.I11_ID, self.I12_ID, self.I13_ID, self.I14_ID,
+            self.I15_ID, self.I16_ID, self.Q_ID, self.QBAR_ID, self.DATA_ID, self.CLK_ID,
+            self.SET_ID, self.CLEAR_ID
+        ] = self.names.lookup(self.pin_list)
+
+        self.cur_character = " "
         self.cur_line = 1
         self.cur_pos = 0
-
-        # The below variables are used to store errors, the parser would call the 
         self.num_error = 0
-        self.error_list = []
-    
+        self.names.display_list()
     def skip_spaces(self):
-        # Skip through all the spaces and newlines until reaching a non-space character
+        """Skip through all the spaces and newlines until reaching a non-space character."""
+        # print("current cha skip_space:")
         while self.cur_character.isspace():
-            self.cur_character = self.advance()
-    
+            self.advance()
+
     def advance(self):
-        # Read the next character from the definition file and places it in cur_character
+        """Read the next character from the definition file and place it in cur_character."""
+        # print("ADVANCING:",self.cur_character)
         self.cur_pos += 1
         self.cur_character = self.file.read(1)
+        # print("AFTER ADVANCING:",self.cur_character)
         if self.cur_character == "\n":
             self.cur_line += 1
             self.cur_pos = 0
 
     def get_name(self):
-        """ Return the name string (or None) and the next non-alphanumeric character. """
-        name = self.cur_character   # By default, self.cur_character must be a letter initially
+        """Return the name string (or None)."""
+        name = self.cur_character  # By default, self.cur_character must be a letter initially
 
         while True:
             self.advance()
             if self.cur_character.isalnum():
-                name = name + self.cur_character
+                name += self.cur_character
             else:
-                return [name, self.cur_character]
-    
+                return name
+
     def get_number(self):
-        """ Return the number (or None) and the next non-alphanumeric character. """
-        number = self.cur_character   # By default, self.cur_character must be a digit initially
+        """Return the next number."""
+        number = self.cur_character  # By default, self.cur_character must be a digit initially
 
         while True:
             self.advance()
             if self.cur_character.isdigit():
                 number = number + self.cur_character
             else:
-                return [int(number), self.cur_character]
+                return number
 
     def get_symbol(self):
         """Translate the next sequence of characters into a symbol."""
-        symbol = Symbol
+        symbol = Symbol()
         self.skip_spaces()
+        # print("################ NEW SYMBOL ##################")
+        # print("current cha:", self.cur_character)
 
-        if self.cur_character.isalpha(): # name
+        if self.cur_character.isalpha():  # name
             name_string = self.get_name()
-            if name_string in self.keywords_list:
+            # print("The symbol is:", name_string)
+            if name_string in self.keyword_list:
                 symbol.type = self.KEYWORD
             elif name_string in self.heading_list:
                 symbol.type = self.HEADING
@@ -154,34 +171,52 @@ class Scanner:
                 symbol.type = self.NAME
 
             [symbol.id] = self.names.lookup([name_string])
+            
 
         elif self.cur_character.isdigit():
-            symbol.id = self.get_number()
+            num_string = self.get_number()
+            [symbol.id] = self.names.lookup([num_string])
             symbol.type = self.NUMBER
-        
+            # print("The symbol is a number:", symbol.id)
+
         elif self.cur_character == ",":
             symbol.type = self.COMMA
             self.advance()
-        
+            # print("The symbol is a comma")
+
         elif self.cur_character == ";":
             symbol.type = self.SEMICOLON
             self.advance()
-        
+            # print("The symbol is a semicolon")
+
         elif self.cur_character == ":":
             symbol.type = self.COLON
             self.advance()
-        
+            # print("The symbol is a colon")
+
         elif self.cur_character == ".":
             symbol.type = self.DOT
             self.advance()
+            # print("The symbol is a dot")
 
         elif self.cur_character == "=":
             symbol.type = self.EQUAL
             self.advance()
-        
+            # print("The symbol is a equal")
+
+        elif self.cur_character == "-":
+            self.advance()
+            if self.cur_character == ">":
+                symbol.type = self.ARROW
+                self.advance()
+                # print("The symbol is an arrow")
+            else:
+                raise SyntaxError("Arrow symbol should be in the form of ->")
+
         elif self.cur_character == "":
             symbol.type = self.EOF
-        
+            # print("The symbol is a EOF")
+
         else:
             raise SyntaxError("Invalid character encountered!")
 
@@ -189,24 +224,18 @@ class Scanner:
 
         return symbol
 
-def display_error(self, error_message):
-    """ This function displays an error message whenever the parser encounters an error;
-        Prints the current text line and a ^ symbol on the next line to highlight the location of the error.
-        Then prints the error message. This function is repeatedly called by the parser. """    
-    
-    self.num_error += 1
-    
-    if not isinstance(error_message, str):
-        raise TypeError("error_message must be a string!")
+    def display_error(self, error_message):
+        """Display an error message whenever the parser encounters an error."""
+        self.num_error += 1
 
-    line_of_text = self.file_lines[self.cur_line - 1]
-    output_message = "ERROR on line " + str(self.cur_line) + ": " + error_message + "\n" + \
-                    line_of_text + " "*self.cur_pos + "^"
-    
-    print(output_message)
-    
-    
+        if not isinstance(error_message, str):
+            raise TypeError("error_message must be a string!")
 
+        line_of_text = self.file_lines[self.cur_line - 1]
+        output_message = (
+            "ERROR on line " + str(self.cur_line) + ": " + error_message + "\n" +
+            line_of_text + " " * self.cur_pos + "^"
+        )
 
-    
-    
+        print(output_message)
+   
