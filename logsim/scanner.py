@@ -343,6 +343,8 @@ class Scanner:
             line_of_text = self.file_lines[self.cur_line - 1]
             error_line_num = str(self.cur_line)
 
+        if line_of_text == self.file_lines[-1]:
+            line_of_text = line_of_text + "\n"
         output_message = (
             "ERROR on line " + error_line_num + ": " + error_message + "\n" +
             line_of_text + " " * (error_symbol.pos - 1) + "^"
