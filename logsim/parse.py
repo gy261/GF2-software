@@ -56,10 +56,11 @@ class Parser:
             print(str, self.cur_symbol.type, self.cur_symbol.id)
 '''
     def skip_section(self):
-        while self.cur_symbol.type != self.scanner.SEMICOLON:
+        self.skip_line()
+        '''while self.cur_symbol.type != self.scanner.SEMICOLON:
             if self.cur_symbol.type == self.scanner.EOF:
                 return
-            self.read()
+            self.read()'''
 
     def skip_line(self):
         while (self.cur_symbol.type != self.scanner.SEMICOLON) and (self.cur_symbol.type != self.scanner.COMMA):
@@ -331,7 +332,7 @@ class Parser:
 
             return_error = self.devices.make_device(id, self.devices.D_TYPE)
             if return_error == self.devices.DEVICE_PRESENT:
-                eromsgc = "Name has been used"
+                eromsg = "Name has been used"
                 return eromsg
             else:
                 # successful
@@ -444,6 +445,9 @@ class Parser:
             return eromsg
 
         input_device = self.devices.get_device(self.cur_symbol.id)
+        if input_device is None:
+            eromsg = "Device called not defined"
+            return eromsg
         #print(input_device.device_id)
 
         self.exact_read()
