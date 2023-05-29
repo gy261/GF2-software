@@ -1,4 +1,4 @@
-# for testing parser
+
 from parse import Parser
 import names, devices, network, monitors, scanner
 from userint import UserInterface

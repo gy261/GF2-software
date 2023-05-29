@@ -50,9 +50,9 @@ class Scanner:
     -------------
     get_symbol(self): Translates the next sequence of characters into a symbol
                       and returns the symbol, with white spaces skipped.
-    
+
     get_exact_symbol(self): Translate the next sequence of characters into a symbol.
-                            Without skipping any spaces. So a SPACE type symbol is 
+                            Without skipping any spaces. So a SPACE type symbol is
                             possible.
 
     display_error(self, error_message, error_symbol): Prints out the error_message when 
@@ -76,7 +76,7 @@ class Scanner:
         except FileNotFoundError:
             print("The path provided is not found.")
             sys.exit()
-        else: 
+        else:
             self.file_lines = file.readlines()  # Stores all the lines of the text file
             file.seek(0,0)
             self.file = file
@@ -106,7 +106,7 @@ class Scanner:
             "I15", "I16", "Q", "QBAR", "DATA", "CLK", "SET", "CLEAR"
         ]
 
-        [
+        self.pin_id = [
             self.I1_ID, self.I2_ID, self.I3_ID, self.I4_ID, self.I5_ID, self.I6_ID, self.I7_ID,
             self.I8_ID, self.I9_ID, self.I10_ID, self.I11_ID, self.I12_ID, self.I13_ID, self.I14_ID,
             self.I15_ID, self.I16_ID, self.Q_ID, self.QBAR_ID, self.DATA_ID, self.CLK_ID,
@@ -190,7 +190,7 @@ class Scanner:
                 symbol.type = self.NAME
 
             [symbol.id] = self.names.lookup([name_string])
-            
+
 
         elif self.cur_character.isdigit():
             num_string = self.get_number()
@@ -228,8 +228,9 @@ class Scanner:
             if self.cur_character == ">":
                 symbol.type = self.ARROW
                 self.advance()
+                # print("The symbol is an arrow")
             else:
-                return symbol
+                raise SyntaxError("Arrow symbol should be in the form of ->")
 
         elif self.cur_character == "":
             symbol.type = self.EOF
@@ -237,7 +238,7 @@ class Scanner:
 
         else:
             return symbol
-        
+
         symbol.line_num = self.cur_line
         # print("Current position:",self.cur_pos)
         return symbol
@@ -309,8 +310,9 @@ class Scanner:
             if self.cur_character == ">":
                 symbol.type = self.ARROW
                 self.advance()
+                # print("The symbol is an arrow")
             else:
-                return symbol
+                raise SyntaxError("Arrow symbol should be in the form of ->")
 
         elif self.cur_character == "":
             symbol.type = self.EOF
