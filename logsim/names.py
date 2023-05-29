@@ -58,7 +58,7 @@ class Names:
         """
         
         if not isinstance(name_string, str):
-            raise TypeError("Expected type for a name_string should be a string!")        
+            raise TypeError("Expected type for a name_string should be a string!")       
             
         else:
             if name_string in self.names:
@@ -104,4 +104,8 @@ class Names:
                 return None
     
     def display_list(self):
+        """Display the current name list.
+        For testing purpose only.
+        """
+
         print("The current namelist is:", self.names)
