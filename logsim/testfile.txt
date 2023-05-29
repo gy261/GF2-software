@@ -1,6 +1,6 @@
 DEVICE:
 
-SWITCH SW1 = 1,
+SWITCH SW1 = 1, # test comments
 SWITCH SW2 = 0,
 NAND G1,
 NAND G2;

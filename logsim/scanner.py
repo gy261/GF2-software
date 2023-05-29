@@ -115,7 +115,13 @@ class Scanner:
         self.cur_pos = 0
         self.prev_pos = -1      # Used for error message pointer '^'
         self.num_error = 0
-        self.names.display_list()
+        # self.names.display_list()
+
+    def skip_comments(self):
+        """Skip through all the comments following the sign # until a new line is reached."""
+        while self.cur_character != "\n":
+            self.advance()
+        self.advance()
 
     def skip_spaces(self):
         """Skip through all the spaces and newlines until reaching a non-space character."""
@@ -160,6 +166,10 @@ class Scanner:
         """Translate the next sequence of characters into a symbol."""
         symbol = Symbol()
         self.skip_spaces()
+        if self.cur_character == "#":
+            self.skip_comments()
+            # print("A comment has been encountered.")
+
         # print("################ NEW SYMBOL ##################")
         # print("current cha:", self.cur_character)
 
@@ -223,8 +233,8 @@ class Scanner:
             # print("The symbol is a EOF")
 
         else:
-            raise SyntaxError("Invalid character encountered!")
-
+            return symbol
+        
         symbol.line_num = self.cur_line
         # print("Current position:",self.cur_pos)
         return symbol
@@ -234,6 +244,10 @@ class Scanner:
         Without skipping any spaces. So a SPACE type symbol is possible.
         """
         symbol = Symbol()
+        if self.cur_character == "#":
+            self.skip_comments()
+            # print("A comment has been encountered.")
+
         # print("################ NEW SYMBOL ##################")
         # print("current cha:", self.cur_character)
 
@@ -301,7 +315,7 @@ class Scanner:
             # print("The symbol is a EOF")
 
         else:
-            raise SyntaxError("Invalid character encountered!")
+            return symbol
 
         symbol.line_num = self.cur_line
 
