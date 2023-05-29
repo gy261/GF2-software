@@ -173,8 +173,8 @@ class Scanner:
             self.skip_comments()
             # print("A comment has been encountered.")
 
-        # print("################ NEW SYMBOL ##################")
-        # print("current cha:", self.cur_character)
+        print("################ NEW SYMBOL ##################")
+        print("current cha:", self.cur_character)
 
         symbol.pos = self.cur_pos
         if self.cur_character.isalpha():  # name
@@ -230,6 +230,7 @@ class Scanner:
                 self.advance()
                 # print("The symbol is an arrow")
             else:
+                self.advance()
                 return symbol
 
         elif self.cur_character == "":
@@ -237,6 +238,7 @@ class Scanner:
             # print("The symbol is a EOF")
 
         else:
+            self.advance()
             return symbol
 
         symbol.line_num = self.cur_line
