@@ -47,21 +47,24 @@ class Parser:
 
 
     def test(self, str=""):
+        # mute:
+        pass
+        '''
         if self.cur_symbol.id:
             print(str, self.cur_symbol.type, self.cur_symbol.id, ":", self.names.get_name_string(self.cur_symbol.id))
         else:
             print(str, self.cur_symbol.type, self.cur_symbol.id)
-
+'''
     def skip_section(self):
         while self.cur_symbol.type != self.scanner.SEMICOLON:
             if self.cur_symbol.type == self.scanner.EOF:
-                return not self.scanner.error_count
+                return
             self.read()
 
     def skip_line(self):
         while (self.cur_symbol.type != self.scanner.SEMICOLON) and (self.cur_symbol.type != self.scanner.COMMA):
             if self.cur_symbol.type == self.scanner.EOF:
-                return not self.scanner.error_count
+                return
             self.read()
 
 
@@ -74,6 +77,10 @@ class Parser:
         expect_connection = False
         expect_monitor = False
 
+        device_section = False
+        connection_section = False
+        monitor_section = False
+
         line_num = 0
         # initialization
         self.read()
@@ -83,6 +90,8 @@ class Parser:
             self.test("big loop:")
 
             if self.cur_symbol.type == self.scanner.EOF:
+                if not self.network.check_network():
+                    self.scanner.display_global_error("Exist inputs not connected")
                 return not self.scanner.error_count
 
             if self.cur_symbol.type == self.scanner.HEADING:
@@ -95,12 +104,14 @@ class Parser:
                         line_num += 1
                         continue
 
-
-                    if (not expect_device) and (not expect_connection) and (not expect_monitor):
-                        expect_device = True
+                    expect_device = True
+                    expect_connection = False
+                    expect_monitor = False
+                    if (not device_section) and (not connection_section) and (not monitor_section):
+                        device_section = True
 
                     else:
-                        if expect_device:
+                        if device_section:
                             self.error("multiple DEVICE")
 
                         else:
@@ -117,13 +128,16 @@ class Parser:
                         line_num += 1
                         continue
 
-                    if (expect_device) and (not expect_connection) and (not expect_monitor):
-                        expect_connection = True
+                    expect_device = False
+                    expect_connection = True
+                    expect_monitor = False
+                    if (device_section) and (not connection_section) and (not monitor_section):
+                        connection_section = True
 
                     else:
-                        if not expect_device:
+                        if not device_section:
                             self.error("No DEVICE stated before")
-                        elif expect_connection:
+                        elif connection_section:
                             self.error("multiple CONNECTION")
                         else:
                             self.error("MONITOR before CONNECTION")
@@ -139,13 +153,16 @@ class Parser:
                         line_num += 1
                         continue
 
-                    if (expect_device) and (expect_connection) and (not expect_monitor):
-                        expect_monitor = True
+                    expect_device = False
+                    expect_connection = False
+                    expect_monitor = True
+                    if (device_section) and (connection_section) and (not monitor_section):
+                        monitor_section = True
 
                     else:
-                        if not expect_device:
+                        if not device_section:
                             self.error("No DEVICE stated before")
-                        elif not expect_connection:
+                        elif not connection_section:
                             self.error("No CONNECTION stated before")
                         else:
                             self.error("multiple MONITOR")
@@ -163,6 +180,11 @@ class Parser:
                             self.skip_line()
                             line_num += 1
                             continue
+                    else:
+                        self.error("device assignment not in DEVICE section")
+                        self.skip_line()
+                        line_num += 1
+                        continue
 
                 elif self.cur_symbol.id == self.scanner.CON_ID:
                     if expect_connection:
@@ -172,6 +194,11 @@ class Parser:
                             self.skip_line()
                             line_num += 1
                             continue
+                    else:
+                        self.error("con assignment not in CONNECTION section")
+                        self.skip_line()
+                        line_num += 1
+                        continue
 
                 elif self.cur_symbol.id == self.scanner.MON_ID:
                     if expect_monitor:
@@ -181,6 +208,11 @@ class Parser:
                             self.skip_line()
                             line_num += 1
                             continue
+                    else:
+                        self.error("mon assignment not in MONITOR section")
+                        self.skip_line()
+                        line_num += 1
+                        continue
 
 
                 else:
@@ -189,12 +221,12 @@ class Parser:
 
 
             else:
-                self.error("Invalid assignment")
+                self.error("Invalid keyword")
+                self.skip_line()
+                line_num += 1
+                continue
 
             line_num += 1
-
-
-
 
     def build_device(self):
         # CLOCK / SWITCH a = 0;
@@ -202,7 +234,7 @@ class Parser:
 
         eromsg = None
         if self.cur_symbol.id == self.devices.CLOCK:
-            print("building clock")
+            #print("building clock")
             self.read()
             if self.cur_symbol.type != self.scanner.NAME:
                 # check if name has already been used
@@ -242,7 +274,7 @@ class Parser:
                 return eromsg
 
         elif self.cur_symbol.id == self.devices.SWITCH:
-            print("building switch")
+            #print("building switch")
             self.read()
             if self.cur_symbol.type != self.scanner.NAME:
                 # check if name has already been used
@@ -282,7 +314,7 @@ class Parser:
                 return eromsg
 
         elif self.cur_symbol.id == self.devices.D_TYPE:
-            print("building dtype")
+            #print("building dtype")
             self.read()
             if self.cur_symbol.type != self.scanner.NAME:
                 # check if name has already been used
@@ -306,7 +338,7 @@ class Parser:
                 return eromsg
 
         elif self.cur_symbol.id == self.devices.XOR:
-            print("building XOR")
+            #print("building XOR")
             self.read()
             if self.cur_symbol.type != self.scanner.NAME:
                 # check if name has already been used
@@ -374,7 +406,7 @@ class Parser:
 
     def build_connect(self):
         # CON g1[.Q] -> g2.I2;
-        print("build connection...")
+        #print("build connection...")
         eromsg = None
         self.read()
         if self.cur_symbol.type != self.scanner.NAME:
@@ -448,7 +480,7 @@ class Parser:
     def build_monitor(self):
         # MON g1[.Q/QBAR];
         eromsg = None
-        print("build monitor...")
+        #print("build monitor...")
         self.read()
         if self.cur_symbol.type != self.scanner.NAME:
             eromsg = "monitor device name required"
@@ -489,7 +521,7 @@ class Parser:
             return eromsg
 
     def error(self, eromsg):
-        self.scanner.display_error(eromsg)
+        self.scanner.display_error(eromsg, self.cur_symbol)
 
     def read(self):
         self.cur_symbol = self.scanner.get_symbol()
