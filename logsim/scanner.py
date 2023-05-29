@@ -230,7 +230,7 @@ class Scanner:
                 self.advance()
                 # print("The symbol is an arrow")
             else:
-                raise SyntaxError("Arrow symbol should be in the form of ->")
+                return symbol
 
         elif self.cur_character == "":
             symbol.type = self.EOF
@@ -312,7 +312,7 @@ class Scanner:
                 self.advance()
                 # print("The symbol is an arrow")
             else:
-                raise SyntaxError("Arrow symbol should be in the form of ->")
+                return symbol
 
         elif self.cur_character == "":
             symbol.type = self.EOF
