@@ -29,7 +29,7 @@ class Symbol:
         self.type = None
         self.id = None
         self.line_num = 0  # The line number of the text file where the symbol is found
-        # self.pos = 0     # The column number of the text file where the symbol is found at its first chracter
+        self.pos = 0     # The column number of the text file where the symbol is found at its first chracter
 
 
 class Scanner:
@@ -55,9 +55,12 @@ class Scanner:
                             Without skipping any spaces. So a SPACE type symbol is 
                             possible.
 
-    display_error(self, error_message): Prints out the error_message when an error
-                    occurs, along with the text line and the exact position of the
-                    symbol that causes the error.
+    display_error(self, error_message, error_symbol): Prints out the error_message when 
+                    an error occurs, along with the text line and the exact position of 
+                    the symbol that causes the error.
+    
+    display_global_error(self, error_message): Prints out the error_message when a global 
+                    error occurs, usually for the logic error of the whole circuit.
     """
 
     def __init__(self, path, names):
@@ -114,7 +117,7 @@ class Scanner:
         self.cur_line = 1
         self.cur_pos = 0
         self.prev_pos = -1      # Used for error message pointer '^'
-        self.num_error = 0
+        self.error_count = 0
         # self.names.display_list()
 
     def skip_comments(self):
@@ -173,6 +176,7 @@ class Scanner:
         # print("################ NEW SYMBOL ##################")
         # print("current cha:", self.cur_character)
 
+        symbol.pos = self.cur_pos
         if self.cur_character.isalpha():  # name
             name_string = self.get_name()
             # print("The symbol is:", name_string)
@@ -249,7 +253,7 @@ class Scanner:
 
         # print("################ NEW SYMBOL ##################")
         # print("current cha:", self.cur_character)
-
+        symbol.pos = self.cur_pos
         if self.cur_character.isalpha():  # name
             name_string = self.get_name()
             # print("The symbol is:", name_string)
@@ -319,25 +323,36 @@ class Scanner:
 
         return symbol
 
-    def display_error(self, error_message):
+    def display_error(self, error_message, error_symbol):
         """Display an error message whenever the parser encounters an error."""
-        self.num_error += 1
+        self.error_count += 1
 
         if not isinstance(error_message, str):
             raise TypeError("error_message must be a string!")
         
+        if not isinstance(error_symbol, Symbol):
+            raise TypeError("error_symbol must be a Symbol!")
+        
         if self.cur_pos == 0:
             line_of_text = self.file_lines[self.cur_line - 2]
             error_line_num = str(self.cur_line - 1)
-            
+                
         else:
             line_of_text = self.file_lines[self.cur_line - 1]
             error_line_num = str(self.cur_line)
 
         output_message = (
             "ERROR on line " + error_line_num + ": " + error_message + "\n" +
-            line_of_text + " " * (self.prev_pos - 1) + "^"
+            line_of_text + " " * (error_symbol.pos - 1) + "^"
         )
 
         print(output_message)
-   
+    
+    def display_global_error(self, error_message):
+        """Display a global error message, usually when there is a logic error"""
+        self.error_count += 1
+
+        if not isinstance(error_message, str):
+            raise TypeError("error_message must be a string!")
+
+        print(error_message)
