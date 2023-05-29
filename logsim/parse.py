@@ -91,8 +91,7 @@ class Parser:
 
             if self.cur_symbol.type == self.scanner.EOF:
                 if not self.network.check_network():
-                    #self.scanner.display_global_error("Exist inputs not connected")
-                    print("Exist inputs not connected")
+                    self.scanner.display_global_error("Exist inputs not connected")
                 return not self.scanner.error_count
 
             if self.cur_symbol.type == self.scanner.HEADING:
@@ -522,7 +521,7 @@ class Parser:
             return eromsg
 
     def error(self, eromsg):
-        self.scanner.display_error(eromsg)
+        self.scanner.display_error(eromsg, self.cur_symbol)
 
     def read(self):
         self.cur_symbol = self.scanner.get_symbol()
