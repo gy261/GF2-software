@@ -173,8 +173,8 @@ class Scanner:
             self.skip_comments()
             # print("A comment has been encountered.")
 
-        print("################ NEW SYMBOL ##################")
-        print("current cha:", self.cur_character)
+        # print("################ NEW SYMBOL ##################")
+        # print("current cha:", self.cur_character)
 
         symbol.pos = self.cur_pos
         if self.cur_character.isalpha():  # name
@@ -337,15 +337,22 @@ class Scanner:
         if not isinstance(error_symbol, Symbol):
             raise TypeError("error_symbol must be a Symbol!")
         
-        if self.cur_pos == 0:
+        if error_symbol.type == self.EOF:
+            i = -1
+            while self.file_lines[i] == "\n":
+                i -= 1
+            line_of_text = self.file_lines[i]
+            error_line_num = str(self.cur_line + i)
+
+        elif self.cur_pos == 0:
             line_of_text = self.file_lines[self.cur_line - 2]
             error_line_num = str(self.cur_line - 1)
-                
+                            
         else:
             line_of_text = self.file_lines[self.cur_line - 1]
             error_line_num = str(self.cur_line)
 
-        if line_of_text == self.file_lines[-1]:
+        if not line_of_text.endswith("\n"):
             line_of_text = line_of_text + "\n"
         output_message = (
             "ERROR on line " + error_line_num + ": " + error_message + "\n" +
