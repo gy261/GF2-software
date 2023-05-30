@@ -268,11 +268,12 @@ class Scanner:
                 symbol.type = self.PIN
             else:
                 symbol.type = self.NAME
-
+            symbol.line_num = self.cur_line
             [symbol.id] = self.names.lookup([name_string])
 
         elif self.cur_character.isspace():
             symbol.type = self.SPACE
+            symbol.line_num = self.cur_line
             self.advance()
             # print("The symbol is a space")
 
@@ -280,15 +281,18 @@ class Scanner:
             num_string = self.get_number()
             [symbol.id] = self.names.lookup([num_string])
             symbol.type = self.NUMBER
+            symbol.line_num = self.cur_line
             # print("The symbol is a number:", symbol.id)
 
         elif self.cur_character == ",":
             symbol.type = self.COMMA
+            symbol.line_num = self.cur_line
             self.advance()
             # print("The symbol is a comma")
 
         elif self.cur_character == ";":
             symbol.type = self.SEMICOLON
+            symbol.line_num = self.cur_line
             self.advance()
             # print("The symbol is a semicolon")
 
@@ -299,11 +303,13 @@ class Scanner:
 
         elif self.cur_character == ".":
             symbol.type = self.DOT
+            symbol.line_num = self.cur_line
             self.advance()
             # print("The symbol is a dot")
 
         elif self.cur_character == "=":
             symbol.type = self.EQUAL
+            symbol.line_num = self.cur_line
             self.advance()
             # print("The symbol is a equal")
 
@@ -311,9 +317,11 @@ class Scanner:
             self.advance()
             if self.cur_character == ">":
                 symbol.type = self.ARROW
+                symbol.line_num = self.cur_line
                 self.advance()
                 # print("The symbol is an arrow")
             else:
+                symbol.line_num = self.cur_line
                 return symbol
 
         elif self.cur_character == "":
@@ -321,9 +329,8 @@ class Scanner:
             # print("The symbol is a EOF")
 
         else:
+            symbol.line_num = self.cur_line
             return symbol
-
-        symbol.line_num = self.cur_line
 
         return symbol
 

@@ -70,30 +70,53 @@ def test_get_symbol(scanner_one):
     assert sym.type == scanner_one.PIN
     assert sym.id == scanner_one.names.query("I1")
 
+# This uses testfile.txt, for normal cases
+@pytest.mark.parametrize("error_symbol_location, expected_arrow_pos, expected_line", [
+    (4, 7 ,3),      # middle of line
+    (2, 6, 2),      # end of line
+    (8, 0, 4),      # start of new line
+])
+
+def test_display_error(error_symbol_location, expected_arrow_pos, expected_line):
+    names = Names()
+    scanner = Scanner("testfile.txt", names)
+    for i in range(error_symbol_location):
+        a = scanner.get_symbol()
+    assert a.pos - 1 == expected_arrow_pos
+    assert a.line_num == expected_line
+
+
+# This uses testfile2.txt, for extreme boundary cases
+@pytest.mark.parametrize("error_symbol_location, expected_arrow_pos, expected_line", [
+    (1, 1 ,1),      # start of file
+    (2, 1, 3),      # end of line with symbol missing
+    (5, 0, 4),      # middle of line with symbol missing
+    (9, 7, 5)       # end of file error
+])
+
+def more_test_display_error(error_symbol_location, expected_arrow_pos, expected_line):
+    names = Names()
+    scanner = Scanner("testfile2.txt", names)
+    for i in range(error_symbol_location):
+        a = scanner.get_symbol()
+    assert a.pos - 1 == expected_arrow_pos
+    assert a.line_num == expected_line
+
+"""
+a = open("testfile2.txt", "r")
+b = a.readlines()
+print(b)
+print(b[2])
+print(b[4].endswith("\n"))
+
+"""
+
+location = 8
 names = Names()
-scanner = Scanner("test2.txt", names)
-"""
-# Testing for get_symbol function
-
-for i in range(10):
-    a = scanner.get_symbol()
-    print("The symbol type and id are", a.type, a.id)
-    if a.id:
-        print(names.get_name_string(a.id))
-
-scanner.names.display_list()
-
-"""
-
-# Testing for error display 
+scanner = Scanner("testfile.txt", names)
 message = "This is a testing error message!"
-
-error_place = 2
-for i in range(error_place):
+for i in range(location):
     a = scanner.get_symbol()
-    print("Symbol",i+1)
-    if a.id != None:
-        print(names.get_name_string(a.id))
 
 scanner.display_error(message,a)
 

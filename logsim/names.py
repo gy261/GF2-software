@@ -102,10 +102,10 @@ class Names:
                 return self.names[name_id]
             else:
                 return None
-    
+   
     def display_list(self):
         """Display the current name list.
-        For testing purpose only.
+        For visualisation and testing purpose only.
         """
 
         print("The current namelist is:", self.names)
