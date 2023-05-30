@@ -1,4 +1,6 @@
-"""Implement the graphical user interface for the Logic Simulator.
+
+    """Implement the graphical user interface for the Logic Simulator.
+
 
 Used in the Logic Simulator project to enable the user to run the simulation
 or adjust the network properties.
@@ -230,6 +232,13 @@ class Gui(wx.Frame):
     def __init__(self, title, path, names, devices, network, monitors):
         """Initialise widgets and layout."""
         super().__init__(parent=None, title=title, size=(800, 600))
+        self.quit_id = 999
+        self.open_id = 998
+        self.help_id = 997
+        self.home_id = 996
+        self.cnf_id = 995
+        self.logic_id = 994
+        self.save_id = 993
 
         # Configure the file menu
         fileMenu = wx.Menu()
@@ -241,31 +250,117 @@ class Gui(wx.Frame):
 
         # Canvas for drawing signals
         self.canvas = MyGLCanvas(self, devices, monitors)
+    
+        # Store for monitored signals from network
+        self.values = None
+        self.trace_names = None
+        self.time_steps = 8
+
+        # Store inputs from logsim.py
+        self.title = title
+        self.path = path
+        self.names = names
+        self.devices = devices
+        self.network = network
+        self.monitors = monitors
+        #self.graph = Graph(self.names, self.devices, self.network,self.monitors)
+
+        #self.switch_ids = self.devices.find_devices(self.devices.SWITCH)
+        #self.switch_names = [self.names.get_name_string(i) for i in self.switch_ids]
+        #self.switch_values = [self.devices.get_switch_value(i) for i in self.switch_ids]
+        #self.sig_mons, self.sig_n_mons = self.monitors.get_signal_names()
+
+
+        # Toolbar setup
+        toolbar = self.CreateToolBar()
+        myimage = wx.ArtProvider.GetBitmap(wx.ART_GO_HOME, wx.ART_TOOLBAR)
+        toolbar.AddTool(self.home_id, "Home", myimage)
+        #myimage = wx.ArtProvider.GetBitmap(wx.ART_FLOPPY, wx.ART_TOOLBAR)
+        #toolbar.AddTool(self.logic_id, "Logic Description", myimage)
+        #myimage = wx.ArtProvider.GetBitmap(wx.ART_EXECUTABLE_FILE, wx.ART_TOOLBAR)
+        #toolbar.AddTool(self.cnf_id, _("CNF"), myimage)
+        myimage = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR)
+        toolbar.AddTool(self.open_id, "Open file", myimage)
+        myimage = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE, wx.ART_TOOLBAR)
+        toolbar.AddTool(self.save_id, "Save file", myimage)
+        myimage = wx.ArtProvider.GetBitmap(wx.ART_HELP, wx.ART_TOOLBAR)
+        toolbar.AddTool(self.help_id, "Help", myimage)
+        toolbar.Bind(wx.EVT_TOOL, self.on_run_button) #should be tool-bar handler 
+        toolbar.Realize()
+        self.ToolBar = toolbar
 
         # Configure the widgets
-        self.text = wx.StaticText(self, wx.ID_ANY, "Cycles")
+        self.text = wx.StaticText(self, wx.ID_ANY, "Cycles to Run")
         self.spin = wx.SpinCtrl(self, wx.ID_ANY, "10")
         self.run_button = wx.Button(self, wx.ID_ANY, "Run")
-        self.text_box = wx.TextCtrl(self, wx.ID_ANY, "",
-                                    style=wx.TE_PROCESS_ENTER)
+        self.continue_button = wx.Button(self, wx.ID_ANY, "Continue")
+        self.text_switch_control = wx.StaticText(self, wx.ID_ANY,"Switch Input")
+        self.switch_choice = wx.ComboBox(self, wx.ID_ANY, "SWITCH", choices=[]) #should be choices = self.switch_names 
+        self.switch_choice.SetValue("First switch name")#should be SetValue(self.switch_names[0])
+        self.switch_choice_value = wx.RadioBox(self,wx.ID_ANY,choices=["0","1"])
+        self.unmonitored_choice = wx.ComboBox(self, wx.ID_ANY, "UNMONITORED", choices=[]) #should be choices = self.sig_n_mons
+        self.monitored_choice = wx.ComboBox(self, wx.ID_ANY, "MONITORED", choices=[]) #should be choices = self.sig_mons
+        self.unmonitored_choice.SetValue("First unmonitored name")#should be SetValue(self.sig_n_mons[0])
+        self.monitored_choice.SetValue("First monitored name")#should be SetValue(self.sig_mons[0])
+        self.text_add_monitor = wx.StaticText(self, wx.ID_ANY,"Signal Monitors")
+        self.add_monitor_button = wx.Button(self, wx.ID_ANY, "Add")
+        self.remove_monitor_button = wx.Button(self, wx.ID_ANY, "Remove")
+        self.exit_button = wx.Button(self, wx.ID_ANY, "Exit")
+        #self.text_box = wx.TextCtrl(self, wx.ID_ANY, "",style=wx.TE_PROCESS_ENTER)
 
-        # Bind events to widgets
+        # Bind events to widgets 
         self.Bind(wx.EVT_MENU, self.on_menu)
         self.spin.Bind(wx.EVT_SPINCTRL, self.on_spin)
         self.run_button.Bind(wx.EVT_BUTTON, self.on_run_button)
-        self.text_box.Bind(wx.EVT_TEXT_ENTER, self.on_text_box)
+        self.continue_button.Bind(wx.EVT_BUTTON, self.on_run_button) #需要增加on run event 
+        self.switch_choice.Bind(wx.EVT_COMBOBOX, self.on_run_button) #需要增加on switch event
+        self.switch_choice_value.Bind(wx.EVT_RADIOBOX, self.on_run_button) #需要增加on switch event 
+        self.unmonitored_choice.Bind(wx.EVT_COMBOBOX, self.on_run_button) #需要增加on switch event 
+        self.monitored_choice.Bind(wx.EVT_COMBOBOX, self.on_run_button) #需要增加on switch event 
+        self.add_monitor_button.Bind(wx.EVT_BUTTON, self.on_run_button) #需要增加add monitor event 
+        self.remove_monitor_button.Bind(wx.EVT_BUTTON, self.on_run_button) #需要增加continue button event 
+        self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit_box)
+        #self.text_box.Bind(wx.EVT_TEXT_ENTER, self.on_text_box)
 
         # Configure sizers for layout
         main_sizer = wx.BoxSizer(wx.HORIZONTAL)
         side_sizer = wx.BoxSizer(wx.VERTICAL)
+        side_sizer1 = wx.BoxSizer(wx.HORIZONTAL)
+        side_sizer2 = wx.BoxSizer(wx.HORIZONTAL)
+        side_sizer3 = wx.BoxSizer(wx.HORIZONTAL)
+        side_sizer4 = wx.BoxSizer(wx.HORIZONTAL)
+        side_sizer5 = wx.BoxSizer(wx.HORIZONTAL)
 
         main_sizer.Add(self.canvas, 5, wx.EXPAND | wx.ALL, 5)
         main_sizer.Add(side_sizer, 1, wx.ALL, 5)
 
-        side_sizer.Add(self.text, 1, wx.TOP, 10)
-        side_sizer.Add(self.spin, 1, wx.ALL, 5)
-        side_sizer.Add(self.run_button, 1, wx.ALL, 5)
-        side_sizer.Add(self.text_box, 1, wx.ALL, 5)
+        side_sizer.Add(self.text, 1, wx.ALL, 10)
+        side_sizer.Add(self.spin, 0, wx.EXPAND | wx.LEFT, 10)
+        side_sizer.Add(side_sizer3, 0, wx.ALL, 5)
+        side_sizer3.Add(self.run_button, 0, wx.EXPAND | wx.LEFT, 25)
+        side_sizer3.Add(self.continue_button, 0, wx.EXPAND | wx.LEFT, 75) 
+        #side_sizer.Add(self.text_box, 1, wx.ALL, 5)
+
+        side_sizer.Add(self.text_switch_control, 0, wx.EXPAND | wx.LEFT, 10)
+        side_sizer.Add(side_sizer4, 0, wx.ALL, 0)
+        #side_sizer4.Add(self.switch_choice, 1, wx.ALL, 5)
+        side_sizer4.Add(self.switch_choice, 0, wx.ALL, 5)
+        side_sizer4.Add(self.switch_choice_value,0, wx.EXPAND | wx.LEFT, 30)
+
+        side_sizer.Add(self.text_add_monitor, 1, wx.ALL, 10)
+        side_sizer.Add(side_sizer1, 1, wx.ALL, 5)
+
+        side_sizer5.Add(self.unmonitored_choice, 0, wx.EXPAND | wx.LEFT, 5)
+        side_sizer5.Add(self.monitored_choice, 0, wx.EXPAND | wx.LEFT, 5)
+        side_sizer.Add(side_sizer5,0, wx.ALL, 5)
+        side_sizer1.Add(self.add_monitor_button, 0, wx.EXPAND | wx.LEFT, 25)
+        side_sizer1.Add(self.remove_monitor_button, 0,  wx.EXPAND | wx.LEFT, 75)
+        side_sizer.Add(self.exit_button,0,wx.ALIGN_CENTER | wx.TOP,270)
+        #side_sizer.Add(self.text_connection_monitor, 1, wx.ALL, 10)
+        #side_sizer.Add(side_sizer5, 1, wx.ALL, 5)
+        #side_sizer.Add(side_sizer6, 1, wx.ALL, 5)
+        #side_sizer.Add(side_sizer7, 1, wx.ALL, 5)
+
 
         self.SetSizeHints(600, 600)
         self.SetSizer(main_sizer)
@@ -295,3 +390,7 @@ class Gui(wx.Frame):
         text_box_value = self.text_box.GetValue()
         text = "".join(["New text box value: ", text_box_value])
         self.canvas.render(text)
+
+    def on_exit_box(self, event):
+        """Handle the event when the user enters text."""
+        wx.Exit()
