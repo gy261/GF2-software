@@ -64,8 +64,10 @@ class Parser:
 
     def skip_line(self):
         while (self.cur_symbol.type != self.scanner.SEMICOLON) and (self.cur_symbol.type != self.scanner.COMMA):
+            #print("here")
             if self.cur_symbol.type == self.scanner.EOF:
                 return
+            #  print(self.cur_symbol.id, self.cur_symbol.type)
             self.read()
 
 
@@ -525,6 +527,7 @@ class Parser:
             return eromsg
 
     def error(self, eromsg):
+        print("Error", self.scanner.error_count+1, ":")
         self.scanner.display_error(eromsg, self.cur_symbol)
 
     def read(self):
