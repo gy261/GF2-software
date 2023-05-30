@@ -343,20 +343,23 @@ class Scanner:
                 i -= 1
             line_of_text = self.file_lines[i]
             error_line_num = str(self.cur_line + i)
+            error_pos = len(self.file_lines[int(error_line_num)-1])
 
         elif self.cur_pos == 0:
             line_of_text = self.file_lines[self.cur_line - 2]
             error_line_num = str(self.cur_line - 1)
-                            
+            error_pos = error_symbol.pos - 1
+
         else:
             line_of_text = self.file_lines[self.cur_line - 1]
             error_line_num = str(self.cur_line)
+            error_pos = error_symbol.pos - 1
 
         if not line_of_text.endswith("\n"):
             line_of_text = line_of_text + "\n"
         output_message = (
             "ERROR on line " + error_line_num + ": " + error_message + "\n" +
-            line_of_text + " " * (error_symbol.pos - 1) + "^"
+            line_of_text + " " * error_pos + "^"
         )
 
         print(output_message)
