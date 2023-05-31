@@ -69,7 +69,7 @@ class MyGLCanvas(wxcanvas.GLCanvas):
 
 
          # Set colour palette
-        self.bkgd_colour = (0.1, 0.1, 0.1)
+        self.bkgd_colour = (1, 1, 1)
         self.line_colour = (0.9, 0.5, 0.1)
         self.text_colour = (0, 0, 0)
         self.axes_colour = (0.5, 0.5, 0.5)
@@ -109,12 +109,13 @@ class MyGLCanvas(wxcanvas.GLCanvas):
         GL.glLoadIdentity()
         GL.glTranslated(self.pan_x, self.pan_y, 0.0)
         GL.glScaled(self.zoom, self.zoom, self.zoom)
+        GL.glClearColor(self.bkgd_colour[0], self.bkgd_colour[1], self.bkgd_colour[2], 0.0)
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT)
   
     def render_graph_axes(self, x, y):
         """Draw axis for a given signal output."""
         time_step_no = len(self.parent.values[0])
-        GL.glColor3f(self.axes_colour[0], self.axes_colour[1],
-                     self.axes_colour[2])  # signal trace is blue
+        GL.glColor3f(self.axes_colour[0], self.axes_colour[1], self.axes_colour[2]) 
 
         GL.glBegin(GL.GL_LINE_STRIP)
         GL.glVertex2f(x - 4, y + 29)
@@ -190,62 +191,13 @@ class MyGLCanvas(wxcanvas.GLCanvas):
         GL.glFlush()
         if self.IsShownOnScreen():
             self.SwapBuffers()
-        # self.SetCurrent(self.context)
-        # if not self.init:
-        #     # Configure the viewport, modelview and projection matrices
-        #     self.init_gl()
-        #     self.init = True
-
-        # # Clear everything
-        # GL.glClear(GL.GL_COLOR_BUFFER_BIT)
-
-        # # Draw specified text at position (10, 10)
-        # self.render_text(text, 10, 10)
-
-        # # Draw a sample signal trace
-        # GL.glColor3f(0.0, 0.0, 1.0)  # signal trace is blue
-        # GL.glBegin(GL.GL_LINE_STRIP)
-        # for i in range(10):
-        #     x = (i * 20) + 10
-        #     x_next = (i * 20) + 30
-        #     if i % 2 == 0:
-        #         y = 75
-        #     else:
-        #         y = 100
-        #     GL.glVertex2f(x, y)
-        #     GL.glVertex2f(x_next, y)
-        # GL.glEnd()
-    
+       
     def render_window(self, text):
         """Decide which screen type to render and render it."""
         if self.screen_type[1]:
             self.render_help()
         elif self.screen_type[0]:
             self.render(text)
-    
-    def render_help(self):
-        """Render the help screen."""
-        if not self.init:
-            # Configure the viewport, modelview and projection matrices
-            self.init_gl()
-            self.init = True
-
-        self.SetCurrent(self.context)
-        self.canvas_size = self.GetClientSize()
-
-        if not self.help_text:
-            try:
-                with open('logsim/help.txt', 'r') as f:
-                    self.help_text = f.readlines()
-            except FileNotFoundError:
-                with open('help.txt', 'r') as f:
-                    self.help_text = f.readlines()
-
-        GL.glClear(GL.GL_COLOR_BUFFER_BIT)
-        self.render_text("Help Page:", 10, self.canvas_size[1] - 20, True) 
-        self.render_text("".join(self.help_text), 10, self.canvas_size[1] - 30)
-        GL.glFlush()
-        self.SwapBuffers()
     
         # We have been drawing to the back buffer, flush the graphics pipeline
         # and swap the back buffer to the front
@@ -324,8 +276,7 @@ class MyGLCanvas(wxcanvas.GLCanvas):
 
     def render_text(self, text, x_pos, y_pos, title=False):
         """Handle text drawing operations."""
-        GL.glColor3f(self.text_colour[0], self.text_colour[1],
-                     self.text_colour[2])  # text is black
+        GL.glColor3f(self.text_colour[0], self.text_colour[1], self.text_colour[2]) 
         GL.glRasterPos2f(x_pos, y_pos)
         if not title:
             font = GLUT.GLUT_BITMAP_HELVETICA_12
@@ -366,14 +317,10 @@ class Gui(wx.Frame):
 
     def __init__(self, title, path, names, devices, network, monitors):
         """Initialise widgets and layout."""
-        super().__init__(parent=None, title=title, size=(800, 600))
-        self.quit_id = 99
-        self.open_id = 98
-        self.help_id = 97
-        self.home_id = 96
-        self.cnf_id = 95
-        self.logic_id = 94
-        self.save_id = 93
+        super().__init__(parent=None, title=title, size=(700, 700))
+        self.open_id = 99
+        self.help_id = 98
+        self.home_id = 97
 
         # Configure the file menu
         fileMenu = wx.Menu()
@@ -412,8 +359,6 @@ class Gui(wx.Frame):
         toolbar.AddTool(self.home_id, "Home", myimage)
         myimage = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR)
         toolbar.AddTool(self.open_id, "Open file", myimage)
-        myimage = wx.ArtProvider.GetBitmap(wx.ART_HELP, wx.ART_TOOLBAR)
-        toolbar.AddTool(self.help_id, "Help", myimage)
         toolbar.Bind(wx.EVT_TOOL, self.toolbar_handler)
         toolbar.Realize()
         self.ToolBar = toolbar
@@ -434,8 +379,9 @@ class Gui(wx.Frame):
         self.text_add_monitor = wx.StaticText(self, wx.ID_ANY,"Signal Monitors")
         self.add_monitor_button = wx.Button(self, wx.ID_ANY, "Add")
         self.remove_monitor_button = wx.Button(self, wx.ID_ANY, "Remove")
+        self.help_button = wx.Button(self, wx.ID_ANY, "Help")
         self.exit_button = wx.Button(self, wx.ID_ANY, "Exit")
-        #self.text_box = wx.TextCtrl(self, wx.ID_ANY, "",style=wx.TE_PROCESS_ENTER)
+        
 
         # Bind events to widgets 
         self.Bind(wx.EVT_MENU, self.on_menu)
@@ -446,17 +392,17 @@ class Gui(wx.Frame):
         self.switch_choice_value.Bind(wx.EVT_RADIOBOX, self.on_switch_choice_value) 
         self.add_monitor_button.Bind(wx.EVT_BUTTON, self.on_add_monitor_button) 
         self.remove_monitor_button.Bind(wx.EVT_BUTTON, self.on_remove_monitor_button) 
+        self.help_button.Bind(wx.EVT_BUTTON,self.on_help_box)
         self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit_box)
         #self.text_box.Bind(wx.EVT_TEXT_ENTER, self.on_text_box)
 
-        # Configure sizers for layout
+         # Configure sizers for layout
         main_sizer = wx.BoxSizer(wx.HORIZONTAL)
         side_sizer = wx.BoxSizer(wx.VERTICAL)
-        side_sizer1 = wx.BoxSizer(wx.HORIZONTAL)
-        side_sizer2 = wx.BoxSizer(wx.HORIZONTAL)
         side_sizer3 = wx.BoxSizer(wx.HORIZONTAL)
         side_sizer4 = wx.BoxSizer(wx.HORIZONTAL)
         side_sizer5 = wx.BoxSizer(wx.HORIZONTAL)
+        side_sizer6 = wx.BoxSizer(wx.HORIZONTAL)
 
         main_sizer.Add(self.canvas, 5, wx.EXPAND | wx.ALL, 5)
         main_sizer.Add(side_sizer, 1, wx.ALL, 5)
@@ -464,31 +410,33 @@ class Gui(wx.Frame):
         side_sizer.Add(self.text, 1, wx.ALL, 10)
         side_sizer.Add(self.spin, 0, wx.EXPAND | wx.LEFT, 10)
         side_sizer.Add(side_sizer3, 0, wx.ALL, 5)
-        side_sizer3.Add(self.run_button, 0, wx.EXPAND | wx.LEFT, 25)
-        side_sizer3.Add(self.continue_button, 0, wx.EXPAND | wx.LEFT, 75) 
+        side_sizer3.Add(self.run_button, 0, wx.EXPAND | wx.LEFT, 15)
+        side_sizer3.Add(self.continue_button, 0, wx.EXPAND | wx.LEFT, 16) 
 
         side_sizer.Add(self.text_switch_control, 0, wx.EXPAND | wx.LEFT, 10)
         side_sizer.Add(side_sizer4, 0, wx.ALL, 0)
-        side_sizer4.Add(self.switch_choice, 0, wx.ALL, 5)
-        side_sizer4.Add(self.switch_choice_value,0, wx.EXPAND | wx.LEFT, 30)
+        side_sizer4.Add(self.switch_choice, 0, wx.ALL, 15)
+        side_sizer4.Add(self.switch_choice_value,0, wx.EXPAND | wx.LEFT, 22)
 
         side_sizer.Add(self.text_add_monitor, 1, wx.ALL, 10)
-        side_sizer.Add(side_sizer1, 1, wx.ALL, 5)
+        side_sizer.Add(side_sizer5, 1, wx.ALL, 5)
+        side_sizer5.Add(self.add_monitor_button, 0, wx.EXPAND | wx.LEFT, 15)
+        side_sizer5.Add(self.remove_monitor_button, 0,  wx.EXPAND | wx.LEFT, 15)
 
-        side_sizer5.Add(self.unmonitored_choice, 0, wx.EXPAND | wx.LEFT, 5)
-        side_sizer5.Add(self.monitored_choice, 0, wx.EXPAND | wx.LEFT, 5)
-        side_sizer.Add(side_sizer5,0, wx.ALL, 5)
-        side_sizer1.Add(self.add_monitor_button, 0, wx.EXPAND | wx.LEFT, 25)
-        side_sizer1.Add(self.remove_monitor_button, 0,  wx.EXPAND | wx.LEFT, 75)
-        side_sizer.Add(self.exit_button,0,wx.ALIGN_CENTER | wx.TOP,270)
+        side_sizer.Add(side_sizer6,0, wx.ALL, 5) 
+        side_sizer6.Add(self.unmonitored_choice, 0, wx.EXPAND | wx.LEFT, 25)
+        side_sizer6.Add(self.monitored_choice, 0, wx.EXPAND | wx.LEFT, 30)
+
+        side_sizer.Add(self.help_button,0,wx.ALIGN_CENTER | wx.TOP,280)
+        side_sizer.Add(self.exit_button,0,wx.ALIGN_CENTER | wx.TOP,10)
 
 
-        self.SetSizeHints(600, 600)
+
+        self.SetSizeHints(700, 700)
         self.SetSizer(main_sizer)
 
         self.run_network_and_get_values()
         self.canvas.render('')
-
 
     def reset_screen(self):
         """Put screen back into its initial state."""
@@ -518,11 +466,7 @@ class Gui(wx.Frame):
             if parser.parse_network():
                 gui = Gui("Logic Simulator", new_path, names, devices, network, monitors)
                 gui.Show(True)
-
-        elif event.GetId() == self.help_id:
-            self.reset_screen()
-            self.canvas.screen_type = (0, 1)
-            self.canvas.render('')
+ 
         elif event.GetId() == self.home_id:
             self.reset_screen()
             self.canvas.screen_type = (1, 0)
@@ -670,6 +614,13 @@ class Gui(wx.Frame):
             self.values.append(monitor_dict[(device_id, output_id)])
         self.trace_names = self.monitors.get_signal_names()[0]
 
+    def on_help_box(self, evnet):
+       """Handle the event when the user needs help.""" 
+       text_help = """User Guidance\n -Run button runs the program for n cycles, and you can change n in the controller above.\n Continue button extends the program for n cycles.\n The state of each switch can be changed bewteen 0/1 after choosing corresponding switch\n The monitored output can also be changed the Add/Remove Button"""
+       dlg_help = wx.MessageDialog(self,text_help,"Help", wx.OK) 
+       dlg_help.ShowModal()
+       dlg_help.Destroy()
+
     def on_exit_box(self, event):
-        """Handle the event when the user enters text."""
+        """Handle the event when the user wants to exit."""
         wx.Exit()
