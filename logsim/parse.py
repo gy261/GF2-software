@@ -47,6 +47,7 @@ class Parser:
 
 
     def test(self, str=""):
+        # print current symbol for debug use
         # mute:
         pass
         '''
@@ -55,16 +56,10 @@ class Parser:
         else:
             print(str, self.cur_symbol.type, self.cur_symbol.id)
 '''
-    def skip_section(self):
-        self.skip_line()
-        '''while self.cur_symbol.type != self.scanner.SEMICOLON:
-            if self.cur_symbol.type == self.scanner.EOF:
-                return
-            self.read()'''
 
     def skip_line(self):
-        while (self.cur_symbol.type != self.scanner.SEMICOLON) and (self.cur_symbol.type != self.scanner.COMMA):
-            #print("here")
+        # skip the line due to an error in line
+        while self.cur_symbol.type != self.scanner.SEMICOLON:
             if self.cur_symbol.type == self.scanner.EOF:
                 return
             #  print(self.cur_symbol.id, self.cur_symbol.type)
@@ -76,10 +71,13 @@ class Parser:
         # For now just return True, so that userint and gui can run in the
         # skeleton code. When complete, should return False when there are
         # errors in the circuit definition file.
+
+        # where is the symbol
         expect_device = False
         expect_connection = False
         expect_monitor = False
 
+        # section order check
         device_section = False
         connection_section = False
         monitor_section = False
@@ -94,7 +92,7 @@ class Parser:
 
             if self.cur_symbol.type == self.scanner.EOF:
                 if not self.network.check_network():
-                    self.scanner.display_global_error("Exist inputs not connected")
+                    self.scanner.display_global_error("Exist inputs that are not connected")
                 return not self.scanner.error_count
 
             if self.cur_symbol.type == self.scanner.HEADING:
@@ -103,7 +101,7 @@ class Parser:
                     self.read()
                     if self.cur_symbol.type != self.scanner.COLON:
                         self.error("colon expected")
-                        self.skip_section()
+                        self.skip_line()
                         line_num += 1
                         continue
 
@@ -119,7 +117,7 @@ class Parser:
 
                         else:
                             self.error("CONNECTION/MONITOR before DEVICE")
-                        self.skip_section()
+                        self.skip_line()
                         line_num += 1
                         continue
 
@@ -127,7 +125,7 @@ class Parser:
                     self.read()
                     if self.cur_symbol.type != self.scanner.COLON:
                         self.error("colon expected")
-                        self.skip_section()
+                        self.skip_line()
                         line_num += 1
                         continue
 
@@ -144,7 +142,7 @@ class Parser:
                             self.error("multiple CONNECTION")
                         else:
                             self.error("MONITOR before CONNECTION")
-                        self.skip_section()
+                        self.skip_line()
                         line_num += 1
                         continue
 
@@ -152,7 +150,7 @@ class Parser:
                     self.read()
                     if self.cur_symbol.type != self.scanner.COLON:
                         self.error("colon expected")
-                        self.skip_section()
+                        self.skip_line()
                         line_num += 1
                         continue
 
@@ -169,7 +167,7 @@ class Parser:
                             self.error("No CONNECTION stated before")
                         else:
                             self.error("multiple MONITOR")
-                        self.skip_section()
+                        self.skip_line()
                         line_num += 1
                         continue
 
@@ -217,12 +215,6 @@ class Parser:
                         line_num += 1
                         continue
 
-
-                else:
-                    ...
-
-
-
             else:
                 self.error("Invalid keyword")
                 self.skip_line()
@@ -260,7 +252,7 @@ class Parser:
             #self.test()
 
             self.read()
-            if (self.cur_symbol.type != self.scanner.COMMA) and (self.cur_symbol.type != self.scanner.SEMICOLON):
+            if self.cur_symbol.type != self.scanner.SEMICOLON:
                 eromsg = "Expect stopping sign"
                 return eromsg
             #self.test()
@@ -300,7 +292,7 @@ class Parser:
             # self.test()
 
             self.read()
-            if (self.cur_symbol.type != self.scanner.COMMA) and (self.cur_symbol.type != self.scanner.SEMICOLON):
+            if self.cur_symbol.type != self.scanner.SEMICOLON:
                 eromsg = "Expect stopping sign"
                 return eromsg
             # self.test()
@@ -327,7 +319,7 @@ class Parser:
             # self.test()
 
             self.read()
-            if (self.cur_symbol.type != self.scanner.COMMA) and (self.cur_symbol.type != self.scanner.SEMICOLON):
+            if self.cur_symbol.type != self.scanner.SEMICOLON:
                 eromsg = "Expect stopping sign"
                 return eromsg
             # self.test()
@@ -351,7 +343,7 @@ class Parser:
             # self.test()
 
             self.read()
-            if (self.cur_symbol.type != self.scanner.COMMA) and (self.cur_symbol.type != self.scanner.SEMICOLON):
+            if self.cur_symbol.type != self.scanner.SEMICOLON:
                 eromsg = "Expect stopping sign"
                 return eromsg
             # self.test()
@@ -389,7 +381,7 @@ class Parser:
             # self.test()
 
             self.read()
-            if (self.cur_symbol.type != self.scanner.COMMA) and (self.cur_symbol.type != self.scanner.SEMICOLON):
+            if self.cur_symbol.type != self.scanner.SEMICOLON:
                 eromsg = "Expect stopping sign"
                 return eromsg
             # self.test()
@@ -467,7 +459,7 @@ class Parser:
         inputpin = self.cur_symbol.id
 
         self.read()
-        if (self.cur_symbol.type != self.scanner.COMMA) and (self.cur_symbol.type != self.scanner.SEMICOLON):
+        if self.cur_symbol.type != self.scanner.SEMICOLON:
             eromsg = "Expect stopping sign"
             return eromsg
 
@@ -512,7 +504,7 @@ class Parser:
             outputpin = None
 
         self.read()
-        if (self.cur_symbol.type != self.scanner.COMMA) and (self.cur_symbol.type != self.scanner.SEMICOLON):
+        if self.cur_symbol.type != self.scanner.SEMICOLON:
             eromsg = "Expect stopping sign"
             return eromsg
 
