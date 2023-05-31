@@ -418,7 +418,6 @@ class Parser:
                 self.devices_list.add(id)
                 return eromsg, self.cur_symbol
 
-
     def build_connect(self):
         # CON g1[.Q] -> g2.I2;
         #print("build connection...")
@@ -496,7 +495,6 @@ class Parser:
             eromsg = "unexpected error"
             return eromsg, self.cur_symbol
 
-
     def build_monitor(self):
         # MON g1[.Q/QBAR];
         eromsg = None
@@ -545,31 +543,13 @@ class Parser:
     def global_error(self, eromsg):
         print("Error", self.scanner.error_count+1, ":")
         self.scanner.display_global_error(eromsg)
+        
     def error(self, eromsg, symbol):
         print("Error", self.scanner.error_count+1, ":")
         self.scanner.display_error(eromsg, symbol)
-
 
     def read(self):
         self.cur_symbol = self.scanner.get_symbol()
 
     def exact_read(self):
         self.cur_symbol = self.scanner.get_exact_symbol()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
