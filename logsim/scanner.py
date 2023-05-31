@@ -82,9 +82,9 @@ class Scanner:
             self.file = file
 
         self.symbol_type_list = [
-            self.KEYWORD, self.NUMBER, self.HEADING, self.NAME, self.COMMA, self.ARROW,
+            self.KEYWORD, self.NUMBER, self.HEADING, self.NAME, self.ARROW,
             self.SEMICOLON, self.COLON, self.DOT, self.EQUAL, self.PIN, self.SPACE, self.EOF
-        ] = range(13)
+        ] = range(12)
 
         self.heading_list = ["DEVICE", "CONNECTION", "MONITOR"]
 
@@ -203,12 +203,6 @@ class Scanner:
             symbol.line_num = self.cur_line
             # print("The symbol is a number:", symbol.id)
 
-        elif self.cur_character == ",":
-            symbol.type = self.COMMA
-            symbol.line_num = self.cur_line
-            self.advance()
-            # print("The symbol is a comma")
-
         elif self.cur_character == ";":
             symbol.type = self.SEMICOLON
             self.advance()
@@ -295,12 +289,6 @@ class Scanner:
             symbol.type = self.NUMBER
             symbol.line_num = self.cur_line
             # print("The symbol is a number:", symbol.id)
-
-        elif self.cur_character == ",":
-            symbol.type = self.COMMA
-            symbol.line_num = self.cur_line
-            self.advance()
-            # print("The symbol is a comma")
 
         elif self.cur_character == ";":
             symbol.type = self.SEMICOLON
