@@ -411,21 +411,21 @@ class Gui(wx.Frame):
         side_sizer.Add(self.spin, 0, wx.EXPAND | wx.LEFT, 10)
         side_sizer.Add(side_sizer3, 0, wx.ALL, 5)
         side_sizer3.Add(self.run_button, 0, wx.EXPAND | wx.LEFT, 15)
-        side_sizer3.Add(self.continue_button, 0, wx.EXPAND | wx.LEFT, 16) 
+        side_sizer3.Add(self.continue_button, 0, wx.EXPAND | wx.LEFT, 35) 
 
         side_sizer.Add(self.text_switch_control, 0, wx.EXPAND | wx.LEFT, 10)
         side_sizer.Add(side_sizer4, 0, wx.ALL, 0)
         side_sizer4.Add(self.switch_choice, 0, wx.ALL, 15)
-        side_sizer4.Add(self.switch_choice_value,0, wx.EXPAND | wx.LEFT, 22)
+        side_sizer4.Add(self.switch_choice_value,0, wx.EXPAND | wx.LEFT, 30)
 
         side_sizer.Add(self.text_add_monitor, 1, wx.ALL, 10)
         side_sizer.Add(side_sizer5, 1, wx.ALL, 5)
         side_sizer5.Add(self.add_monitor_button, 0, wx.EXPAND | wx.LEFT, 15)
-        side_sizer5.Add(self.remove_monitor_button, 0,  wx.EXPAND | wx.LEFT, 15)
+        side_sizer5.Add(self.remove_monitor_button, 0,  wx.EXPAND | wx.LEFT, 35)
 
         side_sizer.Add(side_sizer6,0, wx.ALL, 5) 
-        side_sizer6.Add(self.unmonitored_choice, 0, wx.EXPAND | wx.LEFT, 25)
-        side_sizer6.Add(self.monitored_choice, 0, wx.EXPAND | wx.LEFT, 30)
+        side_sizer6.Add(self.unmonitored_choice, 1, wx.EXPAND | wx.LEFT, 15)
+        side_sizer6.Add(self.monitored_choice, 1, wx.EXPAND | wx.LEFT, 16)
 
         side_sizer.Add(self.help_button,0,wx.ALIGN_CENTER | wx.TOP,280)
         side_sizer.Add(self.exit_button,0,wx.ALIGN_CENTER | wx.TOP,10)
