@@ -436,8 +436,7 @@ class Gui(wx.Frame):
         self.SetSizer(main_sizer)
 
         self.run_network_and_get_values()
-        text = ""
-        self.canvas.render(text)
+
 
     def reset_screen(self):
         """Put screen back into its initial state."""
