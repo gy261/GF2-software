@@ -30,7 +30,7 @@ def test_clock(inputs, outputs):
     p = initialization(inputs)
     p.read()
     rt_value = p.build_device()
-    assert rt_value == outputs
+    assert rt_value[0] == outputs
 
 # test build switch with invalid state
 @pytest.mark.parametrize("inputs, outputs", [("pytest_file/t3.txt", "Expect state should be 0(low) 1(high)")])
@@ -38,7 +38,7 @@ def test_switch(inputs, outputs):
     p = initialization(inputs)
     p.read()
     rt_value = p.build_device()
-    assert rt_value == outputs
+    assert rt_value[0] == outputs
 
 # test build device syntax
 @pytest.mark.parametrize("inputs, outputs", [("pytest_file/t4.txt", "Expect stopping sign")])
@@ -46,21 +46,21 @@ def test_build_device_syntax1(inputs, outputs):
     p = initialization(inputs)
     p.read()
     rt_value = p.build_device()
-    assert rt_value == outputs
+    assert rt_value[0] == outputs
 
 @pytest.mark.parametrize("inputs, outputs", [("pytest_file/t5.txt", "A name expected")])
 def test_build_device_syntax2(inputs, outputs):
     p = initialization(inputs)
     p.read()
     rt_value = p.build_device()
-    assert rt_value == outputs
+    assert rt_value[0] == outputs
 
 @pytest.mark.parametrize("inputs, outputs", [("pytest_file/t6.txt", "Expect equal sign")])
 def test_build_device_syntax3(inputs, outputs):
     p = initialization(inputs)
     p.read()
     rt_value = p.build_device()
-    assert rt_value == outputs
+    assert rt_value[0] == outputs
 
 # test build_connect
 @pytest.mark.parametrize("inputs, outputs", [("pytest_file/t7.txt", "Device called not defined")])
@@ -68,7 +68,7 @@ def test_build_connect(inputs, outputs):
     p = initialization(inputs)
     p.read()
     rt_value = p.build_connect()
-    assert rt_value == outputs
+    assert rt_value[0] == outputs
 
 # test build_monitor
 @pytest.mark.parametrize("inputs, outputs", [("pytest_file/t8.txt", "Device called not defined")])
@@ -76,25 +76,25 @@ def test_build_monitor(inputs, outputs):
     p = initialization(inputs)
     p.read()
     rt_value = p.build_connect()
-    assert rt_value == outputs
+    assert rt_value[0] == outputs
 
 # Overall testing:
-@pytest.mark.parametrize("inputs, outputs", [("pytest_file/deffile1.txt", 0)])
+@pytest.mark.parametrize("inputs, outputs", [("pytest_file/t9.txt", 0)])
 def test_file1(inputs, outputs):
     p = initialization(inputs)
     p.parse_network()
     rt_value = p.scanner.error_count
     assert rt_value == outputs
 
-@pytest.mark.parametrize("inputs, outputs", [("pytest_file/deffile2.txt", 4)])
+@pytest.mark.parametrize("inputs, outputs", [("pytest_file/t10.txt", 5)])
 def test_file2(inputs, outputs):
     p = initialization(inputs)
     p.parse_network()
     rt_value = p.scanner.error_count
     assert rt_value == outputs
 
-@pytest.mark.parametrize("inputs, outputs", [("pytest_file/deffile3.txt", 7)])
-def test_file2(inputs, outputs):
+@pytest.mark.parametrize("inputs, outputs", [("pytest_file/t11.txt", 7)])
+def test_file3(inputs, outputs):
     p = initialization(inputs)
     p.parse_network()
     rt_value = p.scanner.error_count
