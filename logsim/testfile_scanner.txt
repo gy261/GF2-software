@@ -1,0 +1,18 @@
+DEVICE:  # test for comment line
+  
+SWITCH SW1 = 1, # test comments
+SWITCH SW2 = 0,
+NAND G1 = 2,
+NAND G2 = 2;  
+   
+# test for comment line
+  
+CONNECTION: 
+CON SW1 -> G1.I1,
+CON SW2 -> G2.I2,
+CON G1 -> G2.I1,
+CON G2 -> G1.I2;
+
+MONITOR:
+MON G1,
+MON G2; 
