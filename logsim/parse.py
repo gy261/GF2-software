@@ -106,7 +106,7 @@ class Parser:
                 if self.cur_symbol.id == self.scanner.DEVICE_ID:
                     self.read()
                     if self.cur_symbol.type != self.scanner.COLON:
-                        self.error("colon expected")
+                        self.error("colon expected", self.cur_symbol)
                         self.skip_line()
                         line_num += 1
                         continue
@@ -119,10 +119,10 @@ class Parser:
 
                     else:
                         if device_section:
-                            self.error("multiple DEVICE")
+                            self.error("multiple DEVICE", self.cur_symbol)
 
                         else:
-                            self.error("CONNECTION/MONITOR before DEVICE")
+                            self.error("CONNECTION/MONITOR before DEVICE", self.cur_symbol)
                         self.skip_line()
                         line_num += 1
                         continue
@@ -130,7 +130,7 @@ class Parser:
                 elif self.cur_symbol.id == self.scanner.CONNECTION_ID:
                     self.read()
                     if self.cur_symbol.type != self.scanner.COLON:
-                        self.error("colon expected")
+                        self.error("colon expected", self.cur_symbol)
                         self.skip_line()
                         line_num += 1
                         continue
@@ -143,11 +143,11 @@ class Parser:
 
                     else:
                         if not device_section:
-                            self.error("No DEVICE stated before")
+                            self.error("No DEVICE stated before", self.cur_symbol)
                         elif connection_section:
-                            self.error("multiple CONNECTION")
+                            self.error("multiple CONNECTION", self.cur_symbol)
                         else:
-                            self.error("MONITOR before CONNECTION")
+                            self.error("MONITOR before CONNECTION", self.cur_symbol)
                         self.skip_line()
                         line_num += 1
                         continue
@@ -155,7 +155,7 @@ class Parser:
                 elif self.cur_symbol.id == self.scanner.MONITOR_ID:
                     self.read()
                     if self.cur_symbol.type != self.scanner.COLON:
-                        self.error("colon expected")
+                        self.error("colon expected", self.cur_symbol)
                         self.skip_line()
                         line_num += 1
                         continue
@@ -168,11 +168,11 @@ class Parser:
 
                     else:
                         if not device_section:
-                            self.error("No DEVICE stated before")
+                            self.error("No DEVICE stated before", self.cur_symbol)
                         elif not connection_section:
-                            self.error("No CONNECTION stated before")
+                            self.error("No CONNECTION stated before", self.cur_symbol)
                         else:
-                            self.error("multiple MONITOR")
+                            self.error("multiple MONITOR", self.cur_symbol)
                         self.skip_line()
                         line_num += 1
                         continue
@@ -181,49 +181,49 @@ class Parser:
                 # check expect or not
                 if (self.cur_symbol.id in self.devices.gate_types) or (self.cur_symbol.id in self.devices.device_types):
                     if expect_device:
-                        eromsg = self.build_device()
+                        eromsg, symbol = self.build_device()
                         if eromsg:
-                            self.error(eromsg)
+                            self.error(eromsg, symbol)
                             self.skip_line()
                             line_num += 1
                             continue
                         #print(self.devices_list)
                     else:
-                        self.error("device assignment not in DEVICE section")
+                        self.error("device assignment not in DEVICE section", self.cur_symbol)
                         self.skip_line()
                         line_num += 1
                         continue
 
                 elif self.cur_symbol.id == self.scanner.CON_ID:
                     if expect_connection:
-                        eromsg = self.build_connect()
+                        eromsg, symbol = self.build_connect()
                         if eromsg:
-                            self.error(eromsg)
+                            self.error(eromsg, symbol)
                             self.skip_line()
                             line_num += 1
                             continue
                     else:
-                        self.error("con assignment not in CONNECTION section")
+                        self.error("con assignment not in CONNECTION section", self.cur_symbol)
                         self.skip_line()
                         line_num += 1
                         continue
 
                 elif self.cur_symbol.id == self.scanner.MON_ID:
                     if expect_monitor:
-                        eromsg = self.build_monitor()
+                        eromsg, symbol = self.build_monitor()
                         if eromsg:
-                            self.error(eromsg)
+                            self.error(eromsg, symbol)
                             self.skip_line()
                             line_num += 1
                             continue
                     else:
-                        self.error("mon assignment not in MONITOR section")
+                        self.error("mon assignment not in MONITOR section", self.cur_symbol)
                         self.skip_line()
                         line_num += 1
                         continue
 
             else:
-                self.error("Invalid keyword")
+                self.error("Invalid keyword", self.cur_symbol)
                 self.skip_line()
                 line_num += 1
                 continue
@@ -240,40 +240,42 @@ class Parser:
             if self.cur_symbol.type != self.scanner.NAME:
                 # check if name has already been used
                 eromsg = "A name expected"
-                return eromsg
+                return eromsg, self.cur_symbol
+            name_symbol = self.cur_symbol
             id = self.cur_symbol.id
             #self.test()
 
             self.read()
             if self.cur_symbol.type != self.scanner.EQUAL:
                 eromsg = "Expect equal sign"
-                return eromsg
+                return eromsg, self.cur_symbol
             #self.test()
 
             self.read()
             if self.cur_symbol.type != self.scanner.NUMBER:
                 eromsg = "Expect period to be number"
-                return eromsg
+                return eromsg, self.cur_symbol
+            num_symbol = self.cur_symbol
             num = int(self.names.get_name_string(self.cur_symbol.id))
             #self.test()
 
             self.read()
             if self.cur_symbol.type != self.scanner.SEMICOLON:
                 eromsg = "Expect stopping sign"
-                return eromsg
+                return eromsg, self.cur_symbol
             #self.test()
 
             return_error = self.devices.make_device(id, self.devices.CLOCK, num)
             if return_error == self.devices.DEVICE_PRESENT:
                 eromsg = "Name has been used"
-                return eromsg
+                return eromsg, name_symbol
             elif return_error == self.devices.INVALID_QUALIFIER:
                 eromsg = "Expect period to be larger than 0"
-                return eromsg
+                return eromsg, num_symbol
             else:
                 #successful
                 self.devices_list.add(id)
-                return eromsg
+                return eromsg, self.cur_symbol
 
         elif self.cur_symbol.id == self.devices.SWITCH:
             #print("building switch")
@@ -281,41 +283,43 @@ class Parser:
             if self.cur_symbol.type != self.scanner.NAME:
                 # check if name has already been used
                 eromsg = "A name expected"
-                return eromsg
+                return eromsg, self.cur_symbol
+            name_symbol = self.cur_symbol
             id = self.cur_symbol.id
             # self.test()
 
             self.read()
             if self.cur_symbol.type != self.scanner.EQUAL:
                 eromsg = "Expect equal sign"
-                return eromsg
+                return eromsg, self.cur_symbol
             # self.test()
 
             self.read()
             if self.cur_symbol.type != self.scanner.NUMBER:
                 eromsg = "Expect state to be number"
-                return eromsg
+                return eromsg, self.cur_symbol
+            num_symbol = self.cur_symbol
             num = int(self.names.get_name_string(self.cur_symbol.id))
             # self.test()
 
             self.read()
             if self.cur_symbol.type != self.scanner.SEMICOLON:
                 eromsg = "Expect stopping sign"
-                return eromsg
+                return eromsg, self.cur_symbol
             # self.test()
 
             return_error = self.devices.make_device(id, self.devices.SWITCH, num)
             if return_error == self.devices.DEVICE_PRESENT:
                 eromsg = "Name has been used"
-                return eromsg
+                return eromsg, name_symbol
             elif return_error == self.devices.INVALID_QUALIFIER:
                 eromsg = "Expect state should be 0(low) 1(high)"
-                return eromsg
+                return eromsg, num_symbol
             else:
                 # successful
                 # test: print(self.devices.get_device(id).switch_state)
                 self.devices_list.add(id)
-                return eromsg
+                return eromsg, self.cur_symbol
 
         elif self.cur_symbol.id == self.devices.D_TYPE:
             #print("building dtype")
@@ -323,24 +327,25 @@ class Parser:
             if self.cur_symbol.type != self.scanner.NAME:
                 # check if name has already been used
                 eromsg = "A name expected"
-                return eromsg
+                return eromsg, self.cur_symbol
+            name_symbol = self.cur_symbol
             id = self.cur_symbol.id
             # self.test()
 
             self.read()
             if self.cur_symbol.type != self.scanner.SEMICOLON:
                 eromsg = "Expect stopping sign"
-                return eromsg
+                return eromsg, self.cur_symbol
             # self.test()
 
             return_error = self.devices.make_device(id, self.devices.D_TYPE)
             if return_error == self.devices.DEVICE_PRESENT:
                 eromsg = "Name has been used"
-                return eromsg
+                return eromsg, name_symbol
             else:
                 # successful
                 self.devices_list.add(id)
-                return eromsg
+                return eromsg, self.cur_symbol
 
         elif self.cur_symbol.id == self.devices.XOR:
             #print("building XOR")
@@ -348,24 +353,25 @@ class Parser:
             if self.cur_symbol.type != self.scanner.NAME:
                 # check if name has already been used
                 eromsg = "A name expected"
-                return eromsg
+                return eromsg, self.cur_symbol
+            name_symbol = self.cur_symbol
             id = self.cur_symbol.id
             # self.test()
 
             self.read()
             if self.cur_symbol.type != self.scanner.SEMICOLON:
                 eromsg = "Expect stopping sign"
-                return eromsg
+                return eromsg, self.cur_symbol
             # self.test()
 
             return_error = self.devices.make_device(id, self.devices.XOR)
             if return_error == self.devices.DEVICE_PRESENT:
                 eromsg = "Name has been used"
-                return eromsg
+                return eromsg, name_symbol
             else:
                 # successful
                 self.devices_list.add(id)
-                return eromsg
+                return eromsg, self.cur_symbol
 
         elif self.cur_symbol.id in self.devices.gate_types:
             type = self.cur_symbol.id
@@ -374,41 +380,43 @@ class Parser:
             if self.cur_symbol.type != self.scanner.NAME:
                 # check if name has already been used
                 eromsg = "A name expected"
-                return eromsg
+                return eromsg, self.cur_symbol
+            name_symbol = self.cur_symbol
             id = self.cur_symbol.id
             # self.test()
 
             self.read()
             if self.cur_symbol.type != self.scanner.EQUAL:
                 eromsg = "Expect equal sign"
-                return eromsg
+                return eromsg, self.cur_symbol
             # self.test()
 
             self.read()
             if self.cur_symbol.type != self.scanner.NUMBER:
                 eromsg = "Expect number of input pins to be number"
-                return eromsg
+                return eromsg, self.cur_symbol
+            num_symbol = self.cur_symbol
             num = int(self.names.get_name_string(self.cur_symbol.id))
             # self.test()
 
             self.read()
             if self.cur_symbol.type != self.scanner.SEMICOLON:
                 eromsg = "Expect stopping sign"
-                return eromsg
+                return eromsg, self.cur_symbol
             # self.test()
 
             return_error = self.devices.make_device(id, type, num)
             if return_error == self.devices.DEVICE_PRESENT:
                 eromsg = "Name has been used"
-                return eromsg
+                return eromsg, name_symbol
             elif return_error == self.devices.INVALID_QUALIFIER:
                 eromsg = "number of pins out of range"
-                return eromsg
+                return eromsg, num_symbol
             else:
                 # successful
                 #print(self.devices.devices_list)
                 self.devices_list.add(id)
-                return eromsg
+                return eromsg, self.cur_symbol
 
 
     def build_connect(self):
@@ -418,22 +426,22 @@ class Parser:
         self.read()
         if self.cur_symbol.type != self.scanner.NAME:
             eromsg = "output device name required"
-            return eromsg
+            return eromsg, self.cur_symbol
         output_device = self.devices.get_device(self.cur_symbol.id)
         if output_device is None:
             eromsg = "Device called not defined"
-            return eromsg
+            return eromsg, self.cur_symbol
 
         if output_device.device_kind == self.devices.D_TYPE:
             self.exact_read()
             if self.cur_symbol.type != self.scanner.DOT:
                 eromsg = "dot required here"
-                return eromsg
+                return eromsg, self.cur_symbol
 
             self.exact_read()
             if self.cur_symbol.id not in self.devices.dtype_output_ids:
                 eromsg = "Q/QBAR required for DTYPE"
-                return eromsg
+                return eromsg, self.cur_symbol
 
             outputpin = self.cur_symbol.id
         else:
@@ -442,50 +450,51 @@ class Parser:
         self.read()
         if self.cur_symbol.type != self.scanner.ARROW:
             eromsg = "Arrow expected"
-            return eromsg
+            return eromsg, self.cur_symbol
 
         self.read()
         self.test()
         if self.cur_symbol.type != self.scanner.NAME:
             eromsg = "input device name required"
-            return eromsg
+            return eromsg, self.cur_symbol
 
         input_device = self.devices.get_device(self.cur_symbol.id)
         if input_device is None:
             eromsg = "Device called not defined"
-            return eromsg
+            return eromsg, self.cur_symbol
         #print(input_device.device_id)
 
         self.exact_read()
         if self.cur_symbol.type != self.scanner.DOT:
             eromsg = "pin name required: need dot here"
-            return eromsg
+            return eromsg, self.cur_symbol
 
         self.exact_read()
         if self.cur_symbol.type not in self.scanner.pin_id:
             eromsg = "pin name required: need a pinname here"
-            return eromsg
+            return eromsg, self.cur_symbol
         if self.cur_symbol.id not in input_device.inputs:
             eromsg = "pin name not valid for this device"
-            return eromsg
+            return eromsg, self.cur_symbol
+        inputpin_symbol = self.cur_symbol
         inputpin = self.cur_symbol.id
 
         self.read()
         if self.cur_symbol.type != self.scanner.SEMICOLON:
             eromsg = "Expect stopping sign"
-            return eromsg
+            return eromsg, self.cur_symbol
 
         return_error = self.network.make_connection(output_device.device_id, outputpin, input_device.device_id, inputpin)
         if return_error == self.network.INPUT_CONNECTED:
             eromsg = "input already connected"
-            return eromsg
+            return eromsg, inputpin_symbol
         elif return_error == self.network.NO_ERROR:
             # successful
             self.devices_list.discard(output_device.device_id)
-            return eromsg
+            return eromsg, self.cur_symbol
         else:
-            eromsg = "check this error"
-            return eromsg
+            eromsg = "unexpected error"
+            return eromsg, self.cur_symbol
 
 
     def build_monitor(self):
@@ -495,49 +504,51 @@ class Parser:
         self.read()
         if self.cur_symbol.type != self.scanner.NAME:
             eromsg = "monitor device name required"
-            return eromsg
+            return eromsg, self.cur_symbol
         monitor_device = self.devices.get_device(self.cur_symbol.id)
         if monitor_device is None:
             eromsg = "Device called not defined"
-            return eromsg
+            return eromsg, self.cur_symbol
 
         if monitor_device.device_kind == self.devices.D_TYPE:
             self.exact_read()
             if self.cur_symbol.type != self.scanner.DOT:
                 eromsg = "dot required here"
-                return eromsg
+                return eromsg, self.cur_symbol
 
             self.exact_read()
             if self.cur_symbol.id not in self.devices.dtype_output_ids:
                 eromsg = "Q/QBAR required for DTYPE"
-                return eromsg
+                return eromsg, self.cur_symbol
 
             outputpin = self.cur_symbol.id
         else:
             outputpin = None
+        outputpin_symbol = self.cur_symbol
 
         self.read()
         if self.cur_symbol.type != self.scanner.SEMICOLON:
             eromsg = "Expect stopping sign"
-            return eromsg
+            return eromsg, self.cur_symbol
 
         return_error = self.monitors.make_monitor(monitor_device.device_id, outputpin)
         if return_error == self.monitors.NOT_OUTPUT:
             eromsg = "output pin not valid"
-            return eromsg
+            return eromsg, outputpin_symbol
         elif return_error == self.monitors.MONITOR_PRESENT:
             eromsg = "monitor already in"
-            return eromsg
+            return eromsg, outputpin_symbol
         else:
             self.devices_list.discard(monitor_device.device_id)
-            return eromsg
+            return eromsg, self.cur_symbol
 
     def global_error(self, eromsg):
         print("Error", self.scanner.error_count+1, ":")
         self.scanner.display_global_error(eromsg)
-    def error(self, eromsg):
+    def error(self, eromsg, symbol):
         print("Error", self.scanner.error_count+1, ":")
-        self.scanner.display_error(eromsg, self.cur_symbol)
+        self.scanner.display_error(eromsg, symbol)
+
 
     def read(self):
         self.cur_symbol = self.scanner.get_symbol()
