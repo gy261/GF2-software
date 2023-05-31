@@ -19,7 +19,7 @@ def test_invalid_sacnner_intialisation_raises_exception(new_names):
 @pytest.fixture
 def scanner_one(new_names):
     """Return a new scanner instance."""
-    path_one = "test1.txt"
+    path_one = "testfile.txt"
     scanner = Scanner(path_one, new_names)
     return scanner
 
@@ -55,7 +55,7 @@ def test_get_symbol(scanner_one):
     assert sym.type == scanner_one.KEYWORD
     assert sym.id == scanner_one.names.query("SWITCH")
     # ;, ensures that the scanner would work properly for SEMICOLON
-    for i in range(10):
+    for i in range(14):
         sym = scanner_one.get_symbol() 
     assert sym.type == scanner_one.SEMICOLON
     assert sym.id == None
@@ -73,7 +73,7 @@ def test_get_symbol(scanner_one):
 # This uses testfile.txt, for normal cases
 @pytest.mark.parametrize("error_symbol_location, expected_arrow_pos, expected_line", [
     (4, 7 ,3),      # middle of line
-    (2, 6, 2),      # end of line
+    (2, 6, 1),      # end of line
     (8, 0, 4),      # start of new line
 ])
 
@@ -103,21 +103,12 @@ def more_test_display_error(error_symbol_location, expected_arrow_pos, expected_
     assert a.line_num == expected_line
 
 """
-a = open("testfile2.txt", "r")
-b = a.readlines()
-print(b)
-print(b[2])
-print(b[4].endswith("\n"))
-
-"""
-
-location = 8
+location = 10
 names = Names()
 scanner = Scanner("testfile.txt", names)
 message = "This is a testing error message!"
 for i in range(location):
     a = scanner.get_symbol()
-
+print(a.line_num)
 scanner.display_error(message,a)
-
-
+"""

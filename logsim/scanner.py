@@ -178,6 +178,7 @@ class Scanner:
 
         symbol.pos = self.cur_pos
         if self.cur_character.isalpha():  # name
+            symbol.line_num = self.cur_line
             name_string = self.get_name()
             # print("The symbol is:", name_string)
             if name_string in self.keyword_list:
@@ -193,13 +194,16 @@ class Scanner:
 
 
         elif self.cur_character.isdigit():
+            symbol.line_num = self.cur_line
             num_string = self.get_number()
             [symbol.id] = self.names.lookup([num_string])
             symbol.type = self.NUMBER
+            symbol.line_num = self.cur_line
             # print("The symbol is a number:", symbol.id)
 
         elif self.cur_character == ",":
             symbol.type = self.COMMA
+            symbol.line_num = self.cur_line
             self.advance()
             # print("The symbol is a comma")
 
@@ -210,16 +214,19 @@ class Scanner:
 
         elif self.cur_character == ":":
             symbol.type = self.COLON
+            symbol.line_num = self.cur_line
             self.advance()
             # print("The symbol is a colon")
 
         elif self.cur_character == ".":
             symbol.type = self.DOT
+            symbol.line_num = self.cur_line
             self.advance()
             # print("The symbol is a dot")
 
         elif self.cur_character == "=":
             symbol.type = self.EQUAL
+            symbol.line_num = self.cur_line
             self.advance()
             # print("The symbol is a equal")
 
@@ -227,21 +234,24 @@ class Scanner:
             self.advance()
             if self.cur_character == ">":
                 symbol.type = self.ARROW
+                symbol.line_num = self.cur_line
                 self.advance()
                 # print("The symbol is an arrow")
             else:
+                symbol.line_num = self.cur_line
                 self.advance()
                 return symbol
 
         elif self.cur_character == "":
+            symbol.line_num = self.cur_line
             symbol.type = self.EOF
             # print("The symbol is a EOF")
 
         else:
+            symbol.line_num = self.cur_line
             self.advance()
             return symbol
 
-        symbol.line_num = self.cur_line
         # print("Current position:",self.cur_pos)
         return symbol
 

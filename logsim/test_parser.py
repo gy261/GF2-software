@@ -7,7 +7,7 @@ devices = devices.Devices(names)
 network = network.Network(names, devices)
 monitors = monitors.Monitors(names, devices, network)
 
-scanner = scanner.Scanner("test1.txt", names)
+scanner = scanner.Scanner("testfile.txt", names)
 p = Parser(names, devices, network, monitors, scanner)
 
 p.parse_network()

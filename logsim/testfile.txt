@@ -2,8 +2,8 @@ DEVICE:
 
 SWITCH SW1 = 1, # test comments
 SWITCH SW2 = 0,
-NAND G1,
-NAND G2;
+NAND G1 = 2,
+NAND G2 = 2;
 
 CONNECTION: 
 CON SW1 -> G1.I1,
@@ -13,4 +13,4 @@ CON G2 -> G1.I2;
 
 MONITOR:
 MON G1,
-MON G2;
+MON G2; 
