@@ -43,6 +43,7 @@ class Parser:
         self.scanner = scanner
 
         self.cur_symbol = None
+        self.devices_list = set()
 
 
 
@@ -74,6 +75,7 @@ class Parser:
         # errors in the circuit definition file.
 
         # where is the symbol
+
         expect_device = False
         expect_connection = False
         expect_monitor = False
@@ -92,8 +94,11 @@ class Parser:
             self.test("big loop:")
 
             if self.cur_symbol.type == self.scanner.EOF:
+                #print(self.devices_list)
                 if not self.network.check_network():
                     self.global_error("Exist inputs that are not connected")
+                if len(self.devices_list)>0:
+                    self.global_error("Exist devices that are not used in the circuit")
                 return not self.scanner.error_count
 
             if self.cur_symbol.type == self.scanner.HEADING:
@@ -182,6 +187,7 @@ class Parser:
                             self.skip_line()
                             line_num += 1
                             continue
+                        #print(self.devices_list)
                     else:
                         self.error("device assignment not in DEVICE section")
                         self.skip_line()
@@ -227,7 +233,6 @@ class Parser:
     def build_device(self):
         # CLOCK / SWITCH a = 0;
         # Gate g1;
-
         eromsg = None
         if self.cur_symbol.id == self.devices.CLOCK:
             #print("building clock")
@@ -267,6 +272,7 @@ class Parser:
                 return eromsg
             else:
                 #successful
+                self.devices_list.add(id)
                 return eromsg
 
         elif self.cur_symbol.id == self.devices.SWITCH:
@@ -308,6 +314,7 @@ class Parser:
             else:
                 # successful
                 # test: print(self.devices.get_device(id).switch_state)
+                self.devices_list.add(id)
                 return eromsg
 
         elif self.cur_symbol.id == self.devices.D_TYPE:
@@ -332,6 +339,7 @@ class Parser:
                 return eromsg
             else:
                 # successful
+                self.devices_list.add(id)
                 return eromsg
 
         elif self.cur_symbol.id == self.devices.XOR:
@@ -356,6 +364,7 @@ class Parser:
                 return eromsg
             else:
                 # successful
+                self.devices_list.add(id)
                 return eromsg
 
         elif self.cur_symbol.id in self.devices.gate_types:
@@ -398,6 +407,7 @@ class Parser:
             else:
                 # successful
                 #print(self.devices.devices_list)
+                self.devices_list.add(id)
                 return eromsg
 
 
@@ -471,6 +481,7 @@ class Parser:
             return eromsg
         elif return_error == self.network.NO_ERROR:
             # successful
+            self.devices_list.discard(output_device.device_id)
             return eromsg
         else:
             eromsg = "check this error"
@@ -518,6 +529,7 @@ class Parser:
             eromsg = "monitor already in"
             return eromsg
         else:
+            self.devices_list.discard(monitor_device.device_id)
             return eromsg
 
     def global_error(self, eromsg):
