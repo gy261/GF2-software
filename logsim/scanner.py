@@ -169,7 +169,7 @@ class Scanner:
         """Translate the next sequence of characters into a symbol."""
         symbol = Symbol()
         self.skip_spaces()
-        if self.cur_character == "#":
+        while self.cur_character == "#":
             self.skip_comments()
             # print("A comment has been encountered.")
         

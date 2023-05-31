@@ -102,13 +102,13 @@ def more_test_display_error(error_symbol_location, expected_arrow_pos, expected_
     assert a.pos - 1 == expected_arrow_pos
     assert a.line_num == expected_line
 
-"""
-location = 10
+
+location = 3
 names = Names()
-scanner = Scanner("testfile.txt", names)
+scanner = Scanner("testfile_error_1.txt", names)
 message = "This is a testing error message!"
 for i in range(location):
     a = scanner.get_symbol()
 print(a.line_num)
 scanner.display_error(message,a)
-"""
+
