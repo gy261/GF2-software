@@ -502,7 +502,7 @@ class Gui(wx.Frame):
         spin_cont_value = self.spin.GetValue()
 
         self.time_steps += spin_cont_value
-        self.run_network_and_get_values()
+        self.continue_network()
 
         text = "Continue button pressed. (time_steps=%d)" % self.time_steps
         self.canvas.render(text)
@@ -524,7 +524,7 @@ class Gui(wx.Frame):
         self.switch_values[sw_no] = [0, 1][self.switch_choice_value.GetSelection()]
         sw_id = self.names.query(sw_name)
         self.devices.set_switch(sw_id, self.switch_choice_value.GetSelection())
-        self.run_network_and_get_values()
+        self.continue_network()
         self.canvas.render('')
 
     def on_add_monitor_button(self, event):
@@ -592,6 +592,29 @@ class Gui(wx.Frame):
         text = "".join(["New text box value: ", text_box_value])
         self.canvas.render(text)
     
+    def continue_network(self):
+
+        self.canvas.not_connected = not self.network.check_network()
+        if self.canvas.not_connected:
+            return ''
+        osc_here = False
+        for i in range(self.time_steps):
+            if not self.network.execute_network():
+                self.canvas.oscillating = True
+                osc_here = True
+            self.monitors.record_signals()
+        if not osc_here:
+            self.canvas.oscillating = False
+        self.values = []
+
+        monitor_dict = self.monitors.monitors_dictionary
+        for device_id, output_id in monitor_dict:
+
+            self.values.append(monitor_dict[(device_id, output_id)])
+        self.trace_names = self.monitors.get_signal_names()[0]
+
+
+
     def run_network_and_get_values(self):
         """Run the network and get the monitored signal values."""
         self.canvas.not_connected = not self.network.check_network()
@@ -611,6 +634,7 @@ class Gui(wx.Frame):
 
         monitor_dict = self.monitors.monitors_dictionary
         for device_id, output_id in monitor_dict:
+
             self.values.append(monitor_dict[(device_id, output_id)])
         self.trace_names = self.monitors.get_signal_names()[0]
 
