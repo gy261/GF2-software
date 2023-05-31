@@ -1,0 +1,27 @@
+digit = “0” | “1” | “2” | “3” | “4” | “5” | “6” | “7” | “8” | “9” ;
+letter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" 
+| "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" 
+| "V" | "W" | "X" | "Y" | "Z" | "a" | "b" | "c" | "d" | "e" | "f" 
+| "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" 
+| "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" ;
+name = letter, {letter | digit} ;
+bin = (“0” | “1”) ;
+num = digit, {digit} ;
+
+definition_file = Devices , Connections, Monitors ;
+
+Devices = “DEVICE:”, device, {“;” , device} , “;” ;
+device = ( switch | clock | dtype | gate | xor ) ;
+switch = “SWITCH”, name, “=”, bin ;
+clock =  “CLOCK”,  name, ”=”, num ;
+dtype =  “DTYPE”, name ;
+gate =  (“NAND” | “AND” | “OR” | “NOR”) , name  ”=”, num ;
+xor = “XOR”, name ;
+
+Connections: “CONNECTION:”, con, {“;” , con} , “;” ;
+output = name, [“.Q” | “.QBAR”] ;
+input = name, “.”, ( “DATA” | “CLK” | “SET” | “CLEAR” | ’I’, num) ;
+con = “CON”, output, “->”, input ;
+
+Monitors: “MONITOR:”, mon, {“;” , mon} , “;” ;
+mon = “MON”, output ;
