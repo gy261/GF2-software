@@ -48,7 +48,7 @@ class Parser:
 
     def test(self, str=""):
         # print current symbol for debug use
-        # mute:
+        # muted for developed system:
         pass
         '''
         if self.cur_symbol.id:
@@ -64,6 +64,7 @@ class Parser:
                 return
             #  print(self.cur_symbol.id, self.cur_symbol.type)
             self.read()
+        return "skipped"
 
 
     def parse_network(self):
@@ -92,7 +93,7 @@ class Parser:
 
             if self.cur_symbol.type == self.scanner.EOF:
                 if not self.network.check_network():
-                    self.scanner.display_global_error("Exist inputs that are not connected")
+                    self.global_error("Exist inputs that are not connected")
                 return not self.scanner.error_count
 
             if self.cur_symbol.type == self.scanner.HEADING:
@@ -286,7 +287,7 @@ class Parser:
 
             self.read()
             if self.cur_symbol.type != self.scanner.NUMBER:
-                eromsg = "Expect period to be number"
+                eromsg = "Expect state to be number"
                 return eromsg
             num = int(self.names.get_name_string(self.cur_symbol.id))
             # self.test()
@@ -306,6 +307,7 @@ class Parser:
                 return eromsg
             else:
                 # successful
+                # test: print(self.devices.get_device(id).switch_state)
                 return eromsg
 
         elif self.cur_symbol.id == self.devices.D_TYPE:
@@ -518,6 +520,9 @@ class Parser:
         else:
             return eromsg
 
+    def global_error(self, eromsg):
+        print("Error", self.scanner.error_count+1, ":")
+        self.scanner.display_global_error(eromsg)
     def error(self, eromsg):
         print("Error", self.scanner.error_count+1, ":")
         self.scanner.display_error(eromsg, self.cur_symbol)
