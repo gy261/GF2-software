@@ -93,7 +93,7 @@ def test_file2(inputs, outputs):
     rt_value = p.scanner.error_count
     assert rt_value == outputs
 
-@pytest.mark.parametrize("inputs, outputs", [("pytest_file/deffile3.txt", 6)])
+@pytest.mark.parametrize("inputs, outputs", [("pytest_file/deffile3.txt", 7)])
 def test_file2(inputs, outputs):
     p = initialization(inputs)
     p.parse_network()

@@ -1,9 +1,0 @@
-MONITOR
-
-^ MON G1 2;
-
-MON G3   
-
-
-
-
