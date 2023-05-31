@@ -436,7 +436,7 @@ class Gui(wx.Frame):
         self.SetSizer(main_sizer)
 
         self.run_network_and_get_values()
-        self.canvas.render('')
+        self.canvas.render(' ')
 
     def reset_screen(self):
         """Put screen back into its initial state."""
@@ -470,7 +470,7 @@ class Gui(wx.Frame):
         elif event.GetId() == self.home_id:
             self.reset_screen()
             self.canvas.screen_type = (1, 0)
-            self.canvas.render('')
+            self.canvas.render(' ')
 
     def on_menu(self, event):
         """Handle the event when the user selects a menu item."""
@@ -525,7 +525,7 @@ class Gui(wx.Frame):
         sw_id = self.names.query(sw_name)
         self.devices.set_switch(sw_id, self.switch_choice_value.GetSelection())
         self.continue_network()
-        self.canvas.render('')
+        self.canvas.render(' ')
 
     def on_add_monitor_button(self, event):
         """Handle the event when user decides to add a monitor."""
@@ -554,7 +554,7 @@ class Gui(wx.Frame):
             self.unmonitored_choice.SetValue(self.sig_n_mons[0])
         if self.sig_mons:
             self.monitored_choice.SetValue(self.sig_mons[0])
-        self.canvas.render('')
+        self.canvas.render(' ')
     
     def on_remove_monitor_button(self, event):
         """Handle the event when user decides to remove a monitor."""
@@ -584,7 +584,7 @@ class Gui(wx.Frame):
             self.unmonitored_choice.SetValue(self.sig_n_mons[0])
         if self.sig_mons:
             self.monitored_choice.SetValue(self.sig_mons[0])
-        self.canvas.render('')
+        self.canvas.render(' ')
 
     def on_text_box(self, event):
         """Handle the event when the user enters text."""
