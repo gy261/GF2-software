@@ -11,12 +11,14 @@ num = digit, {digit} ;
 definition_file = Devices , Connections, Monitors ;
 
 Devices = “DEVICE:”, device, {“;” , device} , “;” ;
-device = ( switch | clock | dtype | gate | xor ) ;
+device = ( switch | clock | dtype | gate | xor | siggen | rc) ;
 switch = “SWITCH”, name, “=”, bin ;
 clock =  “CLOCK”,  name, ”=”, num ;
 dtype =  “DTYPE”, name ;
 gate =  (“NAND” | “AND” | “OR” | “NOR”) , name  ”=”, num ;
 xor = “XOR”, name ;
+siggen = “SIGGEN”, name, “=”, num, “,”, bin, {bin} ; 
+rc = “RC”, name, “=”, num ;
 
 Connections: “CONNECTION:”, con, {“;” , con} , “;” ;
 output = name, [“.Q” | “.QBAR”] ;
