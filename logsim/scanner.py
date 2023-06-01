@@ -83,8 +83,8 @@ class Scanner:
 
         self.symbol_type_list = [
             self.KEYWORD, self.NUMBER, self.HEADING, self.NAME, self.ARROW,
-            self.SEMICOLON, self.COLON, self.DOT, self.EQUAL, self.PIN, self.SPACE, self.EOF
-        ] = range(12)
+            self.SEMICOLON, self.COLON, self.DOT, self.EQUAL, self.COMMA, self.PIN, self.SPACE, self.EOF
+        ] = range(13)
 
         self.heading_list = ["DEVICE", "CONNECTION", "MONITOR"]
 
@@ -93,12 +93,12 @@ class Scanner:
         ] = self.names.lookup(self.heading_list)
 
         self.keyword_list = [
-            "NAND", "AND", "OR", "NOR", "XOR", "DTYPE", "SWITCH", "CLOCK", "CON", "MON"
+            "NAND", "AND", "OR", "NOR", "XOR", "DTYPE", "SWITCH", "RC", "SIGGEN", "CLOCK", "CON", "MON"
         ]
 
         [
             self.NAND_ID, self.AND_ID, self.OR_ID, self.NOR_ID, self.XOR_ID, self.DTYPE_ID,
-            self.SWITCH_ID, self.CLOCK_ID, self.CON_ID, self.MON_ID
+            self.SWITCH_ID, self.RC_ID, self.SIGGEN_ID, self.CLOCK_ID, self.CON_ID, self.MON_ID
         ] = self.names.lookup(self.keyword_list)
 
         self.pin_list = [
@@ -225,6 +225,12 @@ class Scanner:
             symbol.line_num = self.cur_line
             self.advance()
             # print("The symbol is a equal")
+        
+        elif self.cur_character == ",":
+            symbol.type == self.COMMA
+            symbol.line_num = self.cur_line
+            self.advance()
+            # print("The symbol is a comma")
 
         elif self.cur_character == "-":
             self.advance()
@@ -312,6 +318,12 @@ class Scanner:
             symbol.line_num = self.cur_line
             self.advance()
             # print("The symbol is a equal")
+            
+        elif self.cur_character == ",":
+            symbol.type == self.COMMA
+            symbol.line_num = self.cur_line
+            self.advance()
+            # print("The symbol is a comma")
 
         elif self.cur_character == "-":
             self.advance()
