@@ -317,7 +317,7 @@ class Gui(wx.Frame):
 
     def __init__(self, title, path, names, devices, network, monitors):
         """Initialise widgets and layout."""
-        super().__init__(parent=None, title=title, size=(700, 700))
+        super().__init__(parent=None, title=title, size=(900, 900))
         self.open_id = 99
         self.help_id = 98
         self.home_id = 97
@@ -336,7 +336,7 @@ class Gui(wx.Frame):
         # Store for monitored signals from network
         self.values = None
         self.trace_names = None
-        self.time_steps = 8
+        self.time_steps = 10
 
         # Store inputs from logsim.py
         self.title = title
@@ -432,11 +432,16 @@ class Gui(wx.Frame):
 
 
 
-        self.SetSizeHints(700, 700)
+        self.SetSizeHints(900, 900)
         self.SetSizer(main_sizer)
-
+        
+        sw_name = self.switch_choice.GetValue()
+        sw_val = self.switch_values[self.switch_names.index(sw_name)]
+        if sw_val:
+            self.switch_choice_value.SetSelection(1)
+        else:
+            self.switch_choice_value.SetSelection(0)
         self.run_network_and_get_values()
-
 
     def reset_screen(self):
         """Put screen back into its initial state."""
@@ -501,6 +506,9 @@ class Gui(wx.Frame):
 
     def on_continue_button(self, event):
         """Handle the event when the user clicks the continue button."""
+        spin_value = self.spin.GetValue()
+
+        self.time_steps = spin_value
         self.continue_network()
 
         text = "Continue button pressed. (time_steps=%d)" % self.time_steps
@@ -518,6 +526,8 @@ class Gui(wx.Frame):
 
     def on_switch_choice_value(self, event):
         """Handle the switch-set event."""
+        spin_value = self.spin.GetValue()
+        self.time_steps = spin_value
         sw_name = self.switch_choice.GetValue()
         sw_no = self.switch_names.index(sw_name)
         self.switch_values[sw_no] = [0, 1][self.switch_choice_value.GetSelection()]
@@ -642,7 +652,7 @@ class Gui(wx.Frame):
 
     def on_help_box(self, evnet):
        """Handle the event when the user needs help.""" 
-       text_help = """User Guidance\n -Run button runs the program for n cycles, and you can change n in the controller above.\n Continue button extends the program for n cycles.\n The state of each switch can be changed bewteen 0/1 after choosing corresponding switch\n The monitored output can also be changed the Add/Remove Button"""
+       text_help = """User Guidance\n -Run button runs the program for n cycles, and you can change n in the controller above.\n -Continue button extends the program for n cycles.\n -The state of each switch can be changed bewteen 0/1 after choosing corresponding switch\n -The monitored output can also be changed the Add/Remove Button"""
        dlg_help = wx.MessageDialog(self,text_help,"Help", wx.OK) 
        dlg_help.ShowModal()
        dlg_help.Destroy()
