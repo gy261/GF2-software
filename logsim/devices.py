@@ -41,6 +41,8 @@ class Device:
         self.clock_counter = None
         self.switch_state = None
         self.dtype_memory = None
+        self.siggen_wave = None
+        self.time_constant = None
 
 
 class Devices:
@@ -105,7 +107,7 @@ class Devices:
         self.devices_list = []
 
         gate_strings = ["AND", "OR", "NAND", "NOR", "XOR"]
-        device_strings = ["CLOCK", "SWITCH", "DTYPE"]
+        device_strings = ["CLOCK", "SWITCH", "DTYPE", "SIGGEN", "RC"]
         dtype_inputs = ["CLK", "SET", "CLEAR", "DATA"]
         dtype_outputs = ["Q", "QBAR"]
 
@@ -118,7 +120,7 @@ class Devices:
         self.gate_types = [self.AND, self.OR, self.NAND, self.NOR,
                            self.XOR] = self.names.lookup(gate_strings)
         self.device_types = [self.CLOCK, self.SWITCH,
-                             self.D_TYPE] = self.names.lookup(device_strings)
+                             self.D_TYPE, self.SIGGEN, self.RC] = self.names.lookup(device_strings)
         self.dtype_input_ids = [self.CLK_ID, self.SET_ID, self.CLEAR_ID,
                                 self.DATA_ID] = self.names.lookup(dtype_inputs)
         self.dtype_output_ids = [
@@ -259,7 +261,38 @@ class Devices:
         for output_id in self.dtype_output_ids:
             self.add_output(device_id, output_id)
         self.cold_startup()  # D-type initialised to a random state
+    
+    def check_siggen_property(self, waveform):
+        """Return True if the waveform string is valid
 
+        Valid waveform only takes values of 1 or 0 for each bit
+        """
+        for bit in waveform:
+            if bit not in ["0", "1"]:
+                return False
+        return True
+    
+    def make_siggen(self, device_id, waveform):
+        """Make a siggen device with the specific waveform
+        
+        waveform should be a binary string.
+        """
+        self.add_device(device_id, self.SIGGEN)
+        device = self.get_device(device_id)
+        device.siggen_wave = []
+        for i in waveform:
+            if i == "1":
+                device.siggen_wave.append(self.HIGH)
+            else:
+                device.siggen_wave.append(self.LOW)
+        self.cold_startup()  # initialised to a random point in its cycle
+    
+    def make_rc(self, device_id, time_constant):
+        """Make an RC device with the specific time constant"""
+        self.add_device(device_id, self.RC)
+        device = self.get_device(device_id)
+        device.time_constant = time_constant
+    
     def cold_startup(self):
         """Simulate cold start-up of D-types and clocks.
 
@@ -305,6 +338,26 @@ class Devices:
                 error_type = self.INVALID_QUALIFIER
             else:
                 self.make_clock(device_id, device_property)
+                error_type = self.NO_ERROR
+        
+        elif device_kind == self.SIGGEN:
+            # Device property is a int number containing only 1 or 0
+            if device_property == None:
+                error_type = self.NO_QUALIFIER
+            elif not self.check_siggen_property(str(device_property)):
+                error_type = self.INVALID_QUALIFIER
+            else:
+                self.make_siggen(device_id, str(device_property))
+                error_type = self.NO_ERROR
+        
+        elif device_kind == self.RC:
+            # Device property is the time constant > 0
+            if device_property is None:
+                error_type = self.NO_QUALIFIER
+            elif device_property <= 0:
+                error_type = self.INVALID_QUALIFIER
+            else:
+                self.make_rc(device_id, device_property)
                 error_type = self.NO_ERROR
 
         elif device_kind in self.gate_types:
