@@ -42,6 +42,7 @@ class Device:
         self.switch_state = None
         self.dtype_memory = None
         self.siggen_wave = None
+        self.siggen_counter = None
         self.time_constant = None
 
 
@@ -310,6 +311,12 @@ class Devices:
                 # Initialise it to a random point in its cycle.
                 device.clock_counter = \
                     random.randrange(device.clock_half_period)
+            
+            elif device.device_kind == self.SIGGEN:
+                device.siggen_counter = random.randint(0, len(device.waveform) - 1)
+                siggen_signal = device.siggen_wave[device.siggen_counter]
+                self.add_output(device.device_id, output_id=None,
+                                signal=siggen_signal)
 
     def make_device(self, device_id, device_kind, device_property=None):
         """Create the specified device.
@@ -344,6 +351,7 @@ class Devices:
             # Device property is a int number containing only 1 or 0
             if device_property == None:
                 error_type = self.NO_QUALIFIER
+            # first check that the int number received is only has 1 or 0
             elif not self.check_siggen_property(str(device_property)):
                 error_type = self.INVALID_QUALIFIER
             else:
