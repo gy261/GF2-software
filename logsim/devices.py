@@ -44,6 +44,7 @@ class Device:
         self.siggen_wave = None
         self.siggen_counter = None
         self.time_constant = None
+        self.rc_counter = None 
 
 
 class Devices:
@@ -293,6 +294,9 @@ class Devices:
         self.add_device(device_id, self.RC)
         device = self.get_device(device_id)
         device.time_constant = time_constant
+        device.rc_counter = 0
+        self.add_output(device.device_id, output_id=None,
+                        signal=self.HIGH)
     
     def cold_startup(self):
         """Simulate cold start-up of D-types and clocks.

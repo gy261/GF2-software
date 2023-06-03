@@ -177,6 +177,73 @@ def test_make_connection_gives_error(network_with_devices,
     right_expression = eval(error)
     assert left_expression == right_expression
 
+@pytest.fixture
+def network_with_new_devices():
+    """Return a Network class instance with new siggen and RC devices in the network."""
+    new_names = Names()
+    new_devices = Devices(new_names)
+    new_network = Network(new_names, new_devices)
+
+    [RC1_ID, SIG1_ID, AND1_ID] = new_names.lookup(["RC1", "Sig1", "AND1"])
+
+    # Add devices
+    new_devices.make_device(RC1_ID, new_devices.RC, 3)
+    new_devices.make_device(SIG1_ID, new_devices.SIGGEN, 110)
+    new_devices.make_device(AND1_ID, new_devices.AND, 2)
+
+    return new_network
+
+
+def test_execute_new_devices(network_with_new_devices):
+    """Test if execute_network returns the correct output with RC and siggen"""
+    print("EXECUTE NEW DEVICES")
+    network = network_with_new_devices
+    devices = network.devices
+    names = devices.names
+
+    LOW = devices.LOW
+    HIGH = devices.HIGH
+    siggen_outputs = ""
+
+    [RC1_ID, SIG1_ID, AND1_ID, I1, I2] = names.lookup(["RC1", "Sig1", "AND1", "I1",
+                                                        "I2"])
+    # Inputs are unconnected, get_input_signal should return None
+    assert network.get_input_signal(AND1_ID, I1) is None
+    assert network.get_input_signal(AND1_ID, I2) is None
+
+    # Make connections
+    network.make_connection(RC1_ID, None, AND1_ID, I1)
+    network.make_connection(SIG1_ID, None, AND1_ID, I2)
+    rc = devices.get_device(RC1_ID)
+    sig1 = devices.get_device(SIG1_ID)
+
+    # During the first 3 cycles, RC is HIGH 
+    for i in range(3):
+        network.execute_network()
+        assert network.get_output_signal(RC1_ID, None) == HIGH
+        cur_sig_op = sig1.outputs[None]
+        
+        if cur_sig_op == LOW:
+            assert network.get_output_signal(AND1_ID, None) == LOW
+            siggen_outputs = siggen_outputs + "0"
+        else:
+            assert network.get_output_signal(AND1_ID, None) == HIGH
+            siggen_outputs = siggen_outputs + "1"
+
+    # RC is LOW after the 4th cycle, execute for 2 more cycles
+    for i in range(2):
+        network.execute_network()
+        assert network.get_output_signal(RC1_ID, None) == LOW
+        assert network.get_output_signal(AND1_ID, None) == LOW
+        cur_sig_op = sig1.outputs[None]
+        if cur_sig_op == LOW:
+            siggen_outputs = siggen_outputs + "0"
+        else:
+            siggen_outputs = siggen_outputs + "1"
+
+    # After 5 cycles, it is confirmed that the whole siggen  
+    # waveform is present at least once
+    assert "110" in siggen_outputs
 
 def test_execute_xor(new_network):
     """Test if execute_network returns the correct output for XOR gates."""
