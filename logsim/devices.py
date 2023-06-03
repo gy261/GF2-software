@@ -313,7 +313,7 @@ class Devices:
                     random.randrange(device.clock_half_period)
             
             elif device.device_kind == self.SIGGEN:
-                device.siggen_counter = random.randint(0, len(device.waveform) - 1)
+                device.siggen_counter = random.randint(0, len(device.siggen_wave) - 1)
                 siggen_signal = device.siggen_wave[device.siggen_counter]
                 self.add_output(device.device_id, output_id=None,
                                 signal=siggen_signal)
