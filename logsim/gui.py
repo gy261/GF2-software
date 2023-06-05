@@ -19,7 +19,7 @@ from network import Network
 from monitors import Monitors
 from scanner import Scanner
 from parse import Parser
-
+import gettext 
 
 class MyGLCanvas(wxcanvas.GLCanvas):
     """Handle all drawing operations.
@@ -55,7 +55,6 @@ class MyGLCanvas(wxcanvas.GLCanvas):
         self.parent = parent
         # (home)
         self.screen_type = (1, 0)
-
         # Initialise store for help_text, monitors and devices
         self.monitors = monitors
         self.devices = devices
@@ -165,13 +164,13 @@ class MyGLCanvas(wxcanvas.GLCanvas):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
 
         # Draw title
-        title_text = "Monitored Signal Display"
+        title_text = _('Monitored Signal Display')
         self.render_text(title_text, 10, self.canvas_size[1] - 20, title=True)
 
         if self.not_connected:
-            self.render_text('Not all inputs connected...', 10, self.canvas_size[1] - 60)
+            self.render_text(_('Not all inputs connected...'), 10, self.canvas_size[1] - 60)
         elif self.oscillating:
-            self.render_text('Network Oscillating...', 10, self.canvas_size[1] - 60)
+            self.render_text(_('Network Oscillating...'), 10, self.canvas_size[1] - 60)
         else:
             for j in range(signal_no):
                 self.render_trace(display_x, display_ys[j],
@@ -181,7 +180,6 @@ class MyGLCanvas(wxcanvas.GLCanvas):
 
         GL.glFlush()
         if self.IsShownOnScreen():
-            #pass
             self.SwapBuffers() 
        
     def render_window(self, text):
@@ -313,14 +311,22 @@ class Gui(wx.Frame):
         self.open_id = 99
         self.help_id = 98
         self.home_id = 97
-
+        import builtins
+        builtins.__dict__['_'] = wx.GetTranslation
+        print(wx.Locale.GetSystemLanguage())
+        self.locale = wx.Locale(wx.Locale.GetSystemLanguage())
+        if self.locale.IsOk():
+            self.locale.AddCatalog('base')
+        else:
+            self.locale = None
+        print(_('Exit'))
         # Configure the file menu
         fileMenu = wx.Menu()
         menuBar = wx.MenuBar()
-        fileMenu.Append(wx.ID_ABOUT, "&About")
-        fileMenu.Append(wx.ID_EXIT, "&Exit")
-        fileMenu.Append(self.open_id, "Open File")
-        menuBar.Append(fileMenu, "&File")
+        fileMenu.Append(wx.ID_ABOUT, _("&About"))
+        fileMenu.Append(wx.ID_EXIT, _("&Exit"))
+        fileMenu.Append(self.open_id, _("Open File"))
+        menuBar.Append(fileMenu, _("&File"))
         self.SetMenuBar(menuBar)
 
         # Canvas for drawing signals
@@ -368,11 +374,11 @@ class Gui(wx.Frame):
         self.ToolBar = toolbar
 
         # Configure the widgets
-        self.text = wx.StaticText(self, wx.ID_ANY, "Cycles to Run")
+        self.text = wx.StaticText(self, wx.ID_ANY, _("Cycles to Run"))
         self.spin = wx.SpinCtrl(self, wx.ID_ANY, "10")
-        self.run_button = wx.Button(self, wx.ID_ANY, "Run")
-        self.continue_button = wx.Button(self, wx.ID_ANY, "Continue")
-        self.text_switch_control = wx.StaticText(self, wx.ID_ANY,"Switch Input")
+        self.run_button = wx.Button(self, wx.ID_ANY, _("Run"))
+        self.continue_button = wx.Button(self, wx.ID_ANY, _("Continue"))
+        self.text_switch_control = wx.StaticText(self, wx.ID_ANY, _("Switch Input"))
         self.switch_choice = wx.ComboBox(self, wx.ID_ANY, "SWITCH", choices = self.switch_names)  
         self.switch_choice.SetValue(self.switch_names[0])
         self.switch_choice_value = wx.RadioBox(self,wx.ID_ANY,choices=["0","1"])
@@ -380,11 +386,11 @@ class Gui(wx.Frame):
         self.monitored_choice = wx.ComboBox(self, wx.ID_ANY, "MONITORED", choices=self.sig_mons) 
         self.unmonitored_choice.SetValue(self.sig_n_mons[0])
         self.monitored_choice.SetValue(self.sig_mons[0])
-        self.text_add_monitor = wx.StaticText(self, wx.ID_ANY,"Signal Monitors")
-        self.add_monitor_button = wx.Button(self, wx.ID_ANY, "Add")
-        self.remove_monitor_button = wx.Button(self, wx.ID_ANY, "Remove")
-        self.help_button = wx.Button(self, wx.ID_ANY, "Help")
-        self.exit_button = wx.Button(self, wx.ID_ANY, "Exit")
+        self.text_add_monitor = wx.StaticText(self, wx.ID_ANY, _("Signal Monitors"))
+        self.add_monitor_button = wx.Button(self, wx.ID_ANY, _("Add"))
+        self.remove_monitor_button = wx.Button(self, wx.ID_ANY, _("Remove"))
+        self.help_button = wx.Button(self, wx.ID_ANY, _("Help"))
+        self.exit_button = wx.Button(self, wx.ID_ANY, _("Exit"))
         
 
         # Bind events to widgets 
@@ -398,9 +404,9 @@ class Gui(wx.Frame):
         self.remove_monitor_button.Bind(wx.EVT_BUTTON, self.on_remove_monitor_button) 
         self.help_button.Bind(wx.EVT_BUTTON,self.on_help_box)
         self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit_box)
-        #self.text_box.Bind(wx.EVT_TEXT_ENTER, self.on_text_box)
+        
 
-         # Configure sizers for layout
+        # Configure sizers for layout
         main_sizer = wx.BoxSizer(wx.HORIZONTAL)
         side_sizer = wx.BoxSizer(wx.VERTICAL)
         side_sizer3 = wx.BoxSizer(wx.HORIZONTAL)
@@ -492,7 +498,7 @@ class Gui(wx.Frame):
         if Id == wx.ID_EXIT:
             self.Close(True)
         if Id == wx.ID_ABOUT:
-            wx.MessageBox("Logic Simulator\nCreated by Ziyan Shi\n2023", "About Logsim", wx.ICON_INFORMATION | wx.OK)
+            wx.MessageBox(_("Logic Simulator\nCreated by Ziyan Shi\n2023"), "About Logsim", wx.ICON_INFORMATION | wx.OK)
         if Id == self.open_id:
             openFileDialog = wx.FileDialog(self, "Open txt file", "", "", wildcard="TXT files (*.txt)|*.txt", style=wx.FD_OPEN + wx.FD_FILE_MUST_EXIST)
             self.reset_screen()
@@ -510,7 +516,7 @@ class Gui(wx.Frame):
             scanner = Scanner(new_path, names)
             parser = Parser(names, devices, network, monitors, scanner)
             if parser.parse_network():
-                gui = Gui("Logic Simulator", new_path, names, devices, network, monitors)
+                gui = Gui(_("Logic Simulator"), new_path, names, devices, network, monitors)
                 gui.Show(True)
  
                           
@@ -693,8 +699,8 @@ class Gui(wx.Frame):
 
     def on_help_box(self, evnet):
        """Handle the event when the user needs help.""" 
-       text_help = """User Guidance\n -Run button runs the program for n cycles, and you can change n in the controller above.\n -Continue button extends the program for n cycles.\n -The state of each switch can be changed bewteen 0/1 after choosing corresponding switch\n -The monitored output can also be changed the Add/Remove Button"""
-       dlg_help = wx.MessageDialog(self,text_help,"Help", wx.OK) 
+       text_help = _("User Guidance\n -Run button runs the program for n cycles, and you can change n in the controller above.\n -Continue button extends the program for n cycles.\n -The state of each switch can be changed bewteen 0/1 after choosing corresponding switch\n -The monitored output can also be changed the Add/Remove Button")
+       dlg_help = wx.MessageDialog(self,text_help,"Help", wx.OK)
        dlg_help.ShowModal()
        dlg_help.Destroy()
 
