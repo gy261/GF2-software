@@ -319,6 +319,7 @@ class Gui(wx.Frame):
         menuBar = wx.MenuBar()
         fileMenu.Append(wx.ID_ABOUT, "&About")
         fileMenu.Append(wx.ID_EXIT, "&Exit")
+        fileMenu.Append(self.open_id, "Open File")
         menuBar.Append(fileMenu, "&File")
         self.SetMenuBar(menuBar)
 
@@ -340,13 +341,21 @@ class Gui(wx.Frame):
 
         self.switch_ids = self.devices.find_devices(self.devices.SWITCH)
         if len(self.switch_ids) == 0:
-            self.switch_names = ['None']
+            self.switch_names = ['N/A']
             self.switch_values = [0]
         else: 
             self.switch_names = [self.names.get_name_string(i) for i in self.switch_ids]
             self.switch_values = [self.devices.get_device(i).switch_state for i in self.switch_ids]
-
-        self.sig_mons, self.sig_n_mons = self.monitors.get_signal_names()
+        
+        self.exam_sig_mons, self.exam_sig_n_mons = self.monitors.get_signal_names()
+        if len(self.exam_sig_mons) and len(self.exam_sig_n_mons) != 0:
+            self.sig_mons, self.sig_n_mons = self.exam_sig_mons, self.exam_sig_n_mons
+        if len(self.exam_sig_mons) == 0:
+            self.sig_mons = ['N/A']
+            self.sig_n_mons = self.exam_sig_n_mons
+        if len(self.exam_sig_n_mons) == 0:
+            self.sig_n_mons = ['N/A']
+            self.sig_mons = self.exam_sig_mons
         
         # Toolbar setup
         toolbar = self.CreateToolBar()
@@ -573,7 +582,7 @@ class Gui(wx.Frame):
             mon_choice_name_strt = mon_choice_name
             output_id = None
 
-        if mon_choice_name not in self.sig_n_mons:
+        if mon_choice_name not in self.exam_sig_n_mons:
             return ''
         self.canvas.render('Add: ' + str(mon_choice_name))
 
@@ -581,14 +590,18 @@ class Gui(wx.Frame):
         self.monitors.make_monitor(device_id, output_id)
         self.run_network_and_get_values()
 
-        self.sig_n_mons.remove(mon_choice_name)
-        self.sig_mons.append(mon_choice_name)
+        self.exam_sig_n_mons.remove(mon_choice_name)
+        self.exam_sig_mons.append(mon_choice_name)
         self.unmonitored_choice.SetItems(self.sig_n_mons)
         self.monitored_choice.SetItems(self.sig_mons)
-        if self.sig_n_mons:
-            self.unmonitored_choice.SetValue(self.sig_n_mons[0])
-        if self.sig_mons:
-            self.monitored_choice.SetValue(self.sig_mons[0])
+        if self.exam_sig_n_mons:
+            self.unmonitored_choice.SetValue(self.exam_sig_n_mons[0])
+        else:
+             self.unmonitored_choice.SetValue('N/A')
+        if self.exam_sig_mons:
+            self.monitored_choice.SetValue(self.exam_sig_mons[0])
+        else:
+             self.monitored_choice.SetValue('N/A')
         text = ""
         self.canvas.render(text)
     
@@ -603,7 +616,7 @@ class Gui(wx.Frame):
             mon_choice_name_strt = mon_choice_name
             output_id = None
 
-        if mon_choice_name not in self.sig_mons:
+        if mon_choice_name not in self.exam_sig_mons:
             return ''
         self.canvas.render('Remove: ' + str(mon_choice_name))
 
@@ -611,15 +624,18 @@ class Gui(wx.Frame):
         self.monitors.remove_monitor(device_id, output_id)
         self.run_network_and_get_values()
 
-        self.sig_n_mons.append(mon_choice_name)
-        self.sig_mons.remove(mon_choice_name)
-
+        self.exam_sig_n_mons.append(mon_choice_name)
+        self.exam_sig_mons.remove(mon_choice_name)
         self.unmonitored_choice.SetItems(self.sig_n_mons)
         self.monitored_choice.SetItems(self.sig_mons)
-        if self.sig_n_mons:
-            self.unmonitored_choice.SetValue(self.sig_n_mons[0])
-        if self.sig_mons:
-            self.monitored_choice.SetValue(self.sig_mons[0])
+        if self.exam_sig_n_mons:
+            self.unmonitored_choice.SetValue(self.exam_sig_n_mons[0])
+        else:
+            self.unmonitored_choice.SetValue('N/A')
+        if self.exam_sig_mons:
+            self.monitored_choice.SetValue(self.exam_sig_mons[0])
+        else:
+             self.monitored_choice.SetValue('N/A')
         text = ""
         self.canvas.render(text)
 
