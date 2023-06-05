@@ -51,13 +51,9 @@ class MyGLCanvas(wxcanvas.GLCanvas):
 
     def __init__(self, parent, devices, monitors):
         """Initialise canvas properties and useful variables."""
-        super().__init__(parent, -1,
-                         attribList=[wxcanvas.WX_GL_RGBA,
-                                     wxcanvas.WX_GL_DOUBLEBUFFER,
-                                     wxcanvas.WX_GL_DEPTH_SIZE, 16, 0])
-        
+        super().__init__(parent, -1, attribList=[wxcanvas.WX_GL_RGBA, wxcanvas.WX_GL_DOUBLEBUFFER, wxcanvas.WX_GL_DEPTH_SIZE, 16, 0])
         self.parent = parent
-        # (home, help)
+        # (home)
         self.screen_type = (1, 0)
 
         # Initialise store for help_text, monitors and devices
@@ -133,9 +129,7 @@ class MyGLCanvas(wxcanvas.GLCanvas):
     def render_trace(self, x, y, values, name):
         """Draw a signal output trace."""
         self.render_text(name, 10, y + 5)
-        GL.glColor3f(self.line_colour[0], self.line_colour[1],
-                     self.line_colour[2])
-
+        GL.glColor3f(self.line_colour[0], self.line_colour[1], self.line_colour[2])
         GL.glBegin(GL.GL_LINE_STRIP)
         for i in range(len(values)):
             x0 = (i * 20) + x
@@ -163,8 +157,7 @@ class MyGLCanvas(wxcanvas.GLCanvas):
             self.parent.trace_names = ['N/A']
             self.parent.values = [[]]
 
-        display_ys = [self.canvas_size[1] - 100 - 80 * j for j in
-                      range(len(self.parent.values))]
+        display_ys = [self.canvas_size[1] - 100 - 80 * j for j in range(len(self.parent.values))]
         display_x = 120
         signal_no = len(self.parent.trace_names)
 
@@ -176,11 +169,9 @@ class MyGLCanvas(wxcanvas.GLCanvas):
         self.render_text(title_text, 10, self.canvas_size[1] - 20, title=True)
 
         if self.not_connected:
-            self.render_text(_('Not all inputs connected...'), 10,
-                             self.canvas_size[1] - 60)
+            self.render_text('Not all inputs connected...', 10, self.canvas_size[1] - 60)
         elif self.oscillating:
-            self.render_text(_('Network Oscillating...'), 10,
-                             self.canvas_size[1] - 60)
+            self.render_text('Network Oscillating...', 10, self.canvas_size[1] - 60)
         else:
             for j in range(signal_no):
                 self.render_trace(display_x, display_ys[j],
@@ -190,7 +181,8 @@ class MyGLCanvas(wxcanvas.GLCanvas):
 
         GL.glFlush()
         if self.IsShownOnScreen():
-            self.SwapBuffers()
+            #pass
+            self.SwapBuffers() 
        
     def render_window(self, text):
         """Decide which screen type to render and render it."""
@@ -347,18 +339,21 @@ class Gui(wx.Frame):
         self.monitors = monitors
 
         self.switch_ids = self.devices.find_devices(self.devices.SWITCH)
-        self.switch_names = [self.names.get_name_string(i) for i in self.switch_ids]
-        self.switch_values = [self.devices.get_device(i).switch_state for i in self.switch_ids]
+        if len(self.switch_ids) == 0:
+            self.switch_names = ['None']
+            self.switch_values = [0]
+        else: 
+            self.switch_names = [self.names.get_name_string(i) for i in self.switch_ids]
+            self.switch_values = [self.devices.get_device(i).switch_state for i in self.switch_ids]
+
         self.sig_mons, self.sig_n_mons = self.monitors.get_signal_names()
-        #self.con_ids, self.con_names = self.monitors.get_connection_ids_and_names()
-
-
+        
         # Toolbar setup
         toolbar = self.CreateToolBar()
         myimage = wx.ArtProvider.GetBitmap(wx.ART_GO_HOME, wx.ART_TOOLBAR)
         toolbar.AddTool(self.home_id, "Home", myimage)
-        myimage = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR)
-        toolbar.AddTool(self.open_id, "Open file", myimage)
+        #myimage = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR)
+        #toolbar.AddTool(self.open_id, "Open file", myimage)
         toolbar.Bind(wx.EVT_TOOL, self.toolbar_handler)
         toolbar.Realize()
         self.ToolBar = toolbar
@@ -435,13 +430,16 @@ class Gui(wx.Frame):
         self.SetSizeHints(900, 900)
         self.SetSizer(main_sizer)
         
-        sw_name = self.switch_choice.GetValue()
-        sw_val = self.switch_values[self.switch_names.index(sw_name)]
-        if sw_val:
-            self.switch_choice_value.SetSelection(1)
+        if len(self.switch_ids) == 0:
+            self.run_network_and_get_values() 
         else:
-            self.switch_choice_value.SetSelection(0)
-        self.run_network_and_get_values()
+            sw_name = self.switch_choice.GetValue()
+            sw_val = self.switch_values[self.switch_names.index(sw_name)]
+            if sw_val:
+                self.switch_choice_value.SetSelection(1)
+            else:
+                self.switch_choice_value.SetSelection(0)
+            self.run_network_and_get_values()
 
     def reset_screen(self):
         """Put screen back into its initial state."""
@@ -452,7 +450,41 @@ class Gui(wx.Frame):
 
     def toolbar_handler(self, event):
         """Handle toolbar presses."""
-        if event.GetId() == self.open_id:
+        #if event.GetId() == self.open_id:
+            #openFileDialog = wx.FileDialog(self, "Open txt file", "", "", wildcard="TXT files (*.txt)|*.txt", style=wx.FD_OPEN + wx.FD_FILE_MUST_EXIST)
+            #self.reset_screen()
+            #if openFileDialog.ShowModal() == wx.ID_CANCEL:
+                #print("The user cancelled")
+                #return  # in case users change idea
+            #new_path = openFileDialog.GetPath()
+            #print("File chosen: ", new_path)
+
+            #self.Close(True)
+            #names = Names()
+            #devices = Devices(names)
+            #network = Network(names, devices)
+            #monitors = Monitors(names, devices, network)
+            #scanner = Scanner(new_path, names)
+            #parser = Parser(names, devices, network, monitors, scanner)
+            #if parser.parse_network():
+                #gui = Gui("Logic Simulator", new_path, names, devices, network, monitors)
+                #gui.Show(True)
+ 
+        if event.GetId() == self.home_id:
+            self.reset_screen()
+            self.canvas.screen_type = (1, 0)
+            text = ""
+            self.canvas.render(text)
+        
+
+    def on_menu(self, event):
+        """Handle the event when the user selects a menu item."""
+        Id = event.GetId()
+        if Id == wx.ID_EXIT:
+            self.Close(True)
+        if Id == wx.ID_ABOUT:
+            wx.MessageBox("Logic Simulator\nCreated by Ziyan Shi\n2023", "About Logsim", wx.ICON_INFORMATION | wx.OK)
+        if Id == self.open_id:
             openFileDialog = wx.FileDialog(self, "Open txt file", "", "", wildcard="TXT files (*.txt)|*.txt", style=wx.FD_OPEN + wx.FD_FILE_MUST_EXIST)
             self.reset_screen()
             if openFileDialog.ShowModal() == wx.ID_CANCEL:
@@ -472,21 +504,7 @@ class Gui(wx.Frame):
                 gui = Gui("Logic Simulator", new_path, names, devices, network, monitors)
                 gui.Show(True)
  
-        elif event.GetId() == self.home_id:
-            self.reset_screen()
-            self.canvas.screen_type = (1, 0)
-            text = ""
-            self.canvas.render(text)
-        
-
-    def on_menu(self, event):
-        """Handle the event when the user selects a menu item."""
-        Id = event.GetId()
-        if Id == wx.ID_EXIT:
-            self.Close(True)
-        if Id == wx.ID_ABOUT:
-            wx.MessageBox("Logic Simulator\nCreated by Mojisola Agboola\n2017",
-                          "About Logsim", wx.ICON_INFORMATION | wx.OK)
+                          
 
     def on_spin(self, event):
         """Handle the event when the user changes the spin control value."""
@@ -516,26 +534,33 @@ class Gui(wx.Frame):
 
     def on_switch_choice(self, event):
         """Handle the new-switch-choice event."""
-        sw_name = self.switch_choice.GetValue()
-        sw_val = self.switch_values[self.switch_names.index(sw_name)]
-        if sw_val:
-            self.switch_choice_value.SetSelection(1)
+        if len(self.switch_ids) != 0:
+            sw_name = self.switch_choice.GetValue()
+            sw_val = self.switch_values[self.switch_names.index(sw_name)]
+            if sw_val:
+                self.switch_choice_value.SetSelection(1)
+            else:
+                self.switch_choice_value.SetSelection(0)
         else:
-            self.switch_choice_value.SetSelection(0)
+            pass
     
 
     def on_switch_choice_value(self, event):
         """Handle the switch-set event."""
-        spin_value = self.spin.GetValue()
-        self.time_steps = spin_value
-        sw_name = self.switch_choice.GetValue()
-        sw_no = self.switch_names.index(sw_name)
-        self.switch_values[sw_no] = [0, 1][self.switch_choice_value.GetSelection()]
-        sw_id = self.names.query(sw_name)
-        self.devices.set_switch(sw_id, self.switch_choice_value.GetSelection())
-        self.continue_network()
-        text = ""
-        self.canvas.render(text)
+        if len(self.switch_ids) != 0:
+             spin_value = self.spin.GetValue()
+             self.time_steps = spin_value
+             sw_name = self.switch_choice.GetValue()
+             sw_no = self.switch_names.index(sw_name)
+             self.switch_values[sw_no] = [0, 1][self.switch_choice_value.GetSelection()]
+             sw_id = self.names.query(sw_name)
+             self.devices.set_switch(sw_id, self.switch_choice_value.GetSelection())
+             self.continue_network()
+             text = ""
+             self.canvas.render(text)
+        else:
+            pass
+
 
     def on_add_monitor_button(self, event):
         """Handle the event when user decides to add a monitor."""
