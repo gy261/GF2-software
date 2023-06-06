@@ -10,7 +10,7 @@ num = digit, {digit} ;
 
 definition_file = Devices , Connections, Monitors ;
 
-Devices = “DEVICE:”, device, {“;” , device} , “;” ;
+Devices = “DEVICE:”, {device, “;”} ;
 device = ( switch | clock | dtype | gate | xor | siggen | rc) ;
 switch = “SWITCH”, name, “=”, bin ;
 clock =  “CLOCK”,  name, ”=”, num ;
@@ -20,10 +20,10 @@ xor = “XOR”, name ;
 siggen = “SIGGEN”, name, “=”, bin, {bin} ; 
 rc = “RC”, name, “=”, num ;
 
-Connections: “CONNECTION:”, con, {“;” , con} , “;” ;
+Connections: “CONNECTION:”, {con, “;”} ;
 output = name, [“.Q” | “.QBAR”] ;
 input = name, “.”, ( “DATA” | “CLK” | “SET” | “CLEAR” | ’I’, num) ;
 con = “CON”, output, “->”, input ;
 
-Monitors: “MONITOR:”, mon, {“;” , mon} , “;” ;
+Monitors: “MONITOR:”, {mon, “;”} ;
 mon = “MON”, output ;
