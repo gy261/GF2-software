@@ -99,15 +99,15 @@ class Parser:
                 #print(self.devices_list)
                 if not device_section:
                     if not device_wrong_place:
-                        self.global_error("No DEVICE section in the definition file")
+                        self.global_error("No valid DEVICE section in the definition file")
                 else:
                     if not connection_section:
                         if not connection_wrong_place:
-                            self.global_error("No CONNECTION section in the definition file")
+                            self.global_error("No valid CONNECTION section in the definition file")
                     else:
                         if not monitor_section:
                             if not monitor_wrong_place:
-                                self.global_error("No MONITOR section in the definition file")
+                                self.global_error("No valid MONITOR section in the definition file")
                 if not self.network.check_network():
                     self.global_error("Exist inputs that are not connected")
                 if len(self.devices_list)>0:
