@@ -137,7 +137,7 @@ class Parser:
 
                         else:
                             self.error("CONNECTION/MONITOR before DEVICE", self.cur_symbol)
-                        self.skip_line()
+                        #self.skip_line()
                         line_num += 1
                         continue
 
@@ -163,7 +163,7 @@ class Parser:
                             self.error("multiple CONNECTION section", self.cur_symbol)
                         else:
                             self.error("MONITOR before CONNECTION", self.cur_symbol)
-                        self.skip_line()
+                        #self.skip_line()
                         line_num += 1
                         continue
 
@@ -189,7 +189,7 @@ class Parser:
                             self.error("No CONNECTION stated before", self.cur_symbol)
                         else:
                             self.error("multiple MONITOR section", self.cur_symbol)
-                        self.skip_line()
+                        #self.skip_line()
                         line_num += 1
                         continue
 
