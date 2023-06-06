@@ -17,7 +17,7 @@ clock =  “CLOCK”,  name, ”=”, num ;
 dtype =  “DTYPE”, name ;
 gate =  (“NAND” | “AND” | “OR” | “NOR”) , name  ”=”, num ;
 xor = “XOR”, name ;
-siggen = “SIGGEN”, name, “=”, num, “,”, bin, {bin} ; 
+siggen = “SIGGEN”, name, “=”, bin, {bin} ; 
 rc = “RC”, name, “=”, num ;
 
 Connections: “CONNECTION:”, con, {“;” , con} , “;” ;
