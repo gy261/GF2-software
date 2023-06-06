@@ -20,6 +20,9 @@ from monitors import Monitors
 from scanner import Scanner
 from parse import Parser
 import gettext 
+gettext.bindtextdomain('base', 'locale/')
+gettext.textdomain('base')
+_ = gettext.gettext
 
 class MyGLCanvas(wxcanvas.GLCanvas):
     """Handle all drawing operations.
@@ -311,15 +314,6 @@ class Gui(wx.Frame):
         self.open_id = 99
         self.help_id = 98
         self.home_id = 97
-        import builtins
-        builtins.__dict__['_'] = wx.GetTranslation
-        print(wx.Locale.GetSystemLanguage())
-        self.locale = wx.Locale(wx.Locale.GetSystemLanguage())
-        if self.locale.IsOk():
-            self.locale.AddCatalog('base')
-        else:
-            self.locale = None
-        print(_('Exit'))
         # Configure the file menu
         fileMenu = wx.Menu()
         menuBar = wx.MenuBar()
@@ -465,26 +459,6 @@ class Gui(wx.Frame):
 
     def toolbar_handler(self, event):
         """Handle toolbar presses."""
-        #if event.GetId() == self.open_id:
-            #openFileDialog = wx.FileDialog(self, "Open txt file", "", "", wildcard="TXT files (*.txt)|*.txt", style=wx.FD_OPEN + wx.FD_FILE_MUST_EXIST)
-            #self.reset_screen()
-            #if openFileDialog.ShowModal() == wx.ID_CANCEL:
-                #print("The user cancelled")
-                #return  # in case users change idea
-            #new_path = openFileDialog.GetPath()
-            #print("File chosen: ", new_path)
-
-            #self.Close(True)
-            #names = Names()
-            #devices = Devices(names)
-            #network = Network(names, devices)
-            #monitors = Monitors(names, devices, network)
-            #scanner = Scanner(new_path, names)
-            #parser = Parser(names, devices, network, monitors, scanner)
-            #if parser.parse_network():
-                #gui = Gui("Logic Simulator", new_path, names, devices, network, monitors)
-                #gui.Show(True)
- 
         if event.GetId() == self.home_id:
             self.reset_screen()
             self.canvas.screen_type = (1, 0)
