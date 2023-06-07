@@ -172,8 +172,7 @@ class Scanner:
         while self.cur_character == "#":
             self.skip_comments()
             # print("A comment has been encountered.")
-        
-        self.skip_spaces()
+            self.skip_spaces()
 
         # print("################ NEW SYMBOL ##################")
         # print("current cha:", self.cur_character)
