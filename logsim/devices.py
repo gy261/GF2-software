@@ -321,6 +321,12 @@ class Devices:
                 siggen_signal = device.siggen_wave[device.siggen_counter]
                 self.add_output(device.device_id, output_id=None,
                                 signal=siggen_signal)
+            
+            elif device.device_kind == self.RC:
+                device.RC_counter = 0
+                rc_signal = 1
+                self.add_output(device.device_id, output_id=None,
+                                signal=rc_signal)
 
     def make_device(self, device_id, device_kind, device_property=None):
         """Create the specified device.
