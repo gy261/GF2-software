@@ -4,10 +4,12 @@
 **definition_file_2.txt:** Testing definition file 2  test switch/NAND/OR \
 **definition_file_3.txt:** Testing definition file 3  test RC/SIGGEN/OR \
 **devices.py:** Make devices and set device properties.\
-**gui.py:** Configured the graphical user interface, plot the waveform of the monitored signal on the canvas.
-**Classes:**\
-**MyGLCanvas** - handles all canvas drawing operations.
-**Gui** - configures the main window and all the widgets.
+
+**gui.py:** Configured the graphical user interface, plot the waveform of the monitored signal on the canvas.\
+Two Classes:\
+**MyGLCanvas** - handles all canvas drawing operations.\
+**Gui** - configures the main window and all the widgets.\
+
 **logsim.py:** Parse command line options and arguments for the Logic Simulator.\
 **monitors.py:** Record and display output signals.\
 **names.py:** Map variable names and string names to unique integers.\
