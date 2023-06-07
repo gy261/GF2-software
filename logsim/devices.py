@@ -95,7 +95,14 @@ class Devices:
 
     make_d_type(self, device_id): Makes a D-type device.
 
-    cold_startup(self): Simulates cold start-up of D-types and clocks.
+    make_siggen(self, device_id, waveform): Makes a siggen device with the 
+                                            specific waveform.
+    
+    make_rc(self, device_id, time_constant): Makes a RC device with the 
+                                             specified time constant
+
+    cold_startup(self): Simulates cold start-up of D-types, clocks, siggens 
+                        and RC.
 
     make_device(self, device_id, device_kind, device_property=None): Creates
                        the specified device and returns errors if unsuccessful.
@@ -299,10 +306,11 @@ class Devices:
                         signal=self.HIGH)
     
     def cold_startup(self):
-        """Simulate cold start-up of D-types and clocks.
+        """Simulate cold start-up of D-types, clocks, siggens and RC
 
         Set the memory of the D-types to a random state and make the clocks
-        begin from a random point in their cycles.
+        and siggens begin from a random point in their cycles. Set RC to its
+        initial HIGH state.
         """
         for device in self.devices_list:
             if device.device_kind == self.D_TYPE:
