@@ -261,7 +261,7 @@ class Scanner:
         Without skipping any spaces. So a SPACE type symbol is possible.
         """
         symbol = Symbol()
-        if self.cur_character == "#":
+        while self.cur_character == "#":
             self.skip_comments()
             # print("A comment has been encountered.")
 
