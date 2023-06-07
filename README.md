@@ -7,8 +7,8 @@
 
 **gui.py:** Configured the graphical user interface, plot the waveform of the monitored signal on the canvas.\
 Two Classes:\
-**MyGLCanvas** - handles all canvas drawing operations.\
-**Gui** - configures the main window and all the widgets.\
+MyGLCanvas - handles all canvas drawing operations.\
+Gui - configures the main window and all the widgets.
 
 **logsim.py:** Parse command line options and arguments for the Logic Simulator.\
 **monitors.py:** Record and display output signals.\
