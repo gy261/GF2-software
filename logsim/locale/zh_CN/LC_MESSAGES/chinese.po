@@ -20,20 +20,20 @@ msgid "Network Oscillating..."
 msgstr "网络震荡..."
 
 #: gui.py:319
-msgid "&About"
-msgstr "＆关于"
+msgid "About"
+msgstr "关于"
 
 #: gui.py:320
-msgid "&Exit"
-msgstr "＆出口"
+msgid "Exit"
+msgstr "出口"
 
 #: gui.py:321
 msgid "Open File"
 msgstr "打开文件"
 
 #: gui.py:322
-msgid "&File"
-msgstr "＆文件"
+msgid "File"
+msgstr "文件"
 
 #: gui.py:370
 msgid "Cycles to Run"
