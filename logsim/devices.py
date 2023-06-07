@@ -323,7 +323,7 @@ class Devices:
                                 signal=siggen_signal)
             
             elif device.device_kind == self.RC:
-                device.RC_counter = 0
+                device.rc_counter = 0
                 rc_signal = 1
                 self.add_output(device.device_id, output_id=None,
                                 signal=rc_signal)
