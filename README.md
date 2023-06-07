@@ -11,5 +11,5 @@ names.py:Map variable names and string names to unique integers.\
 network.py:Build and execute the network.\
 parse.py:Parse the definition file and build the logic network.\
 scanner:Read the circuit definition file and translate the characters into symbols.\
-userint.py:Implement the interactive command line user interface.\
+userint.py:Implement the interactive command line user interface.
 
