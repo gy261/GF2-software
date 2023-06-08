@@ -1,0 +1,65 @@
+CONNECTION:
+CON a1 -> g2.I2;
+DEVICE:
+XOR g2;
+
+DsEVICE:
+CLOCK c1=0
+SWITCH sw1=5;
+AND a1 = 2;
+
+CONNECTION,
+CON c1->a1.I2;
+CON sw1 -> a1.I1;
+
+MONITOR:
+MON a1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
