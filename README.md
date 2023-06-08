@@ -1,7 +1,7 @@
 # GF2-software
-3rd year software project \
+3rd year software project
 
-
+## Description
 **definition_file_1.txt:** Testing definition file 1  test switch/clock/XOR/NAND/DTYPE/AND/NOR \
 **definition_file_2.txt:** Testing definition file 2  test switch/NAND/OR \
 **definition_file_3.txt:** Testing definition file 3  test RC/SIGGEN/OR \
@@ -20,4 +20,12 @@ Gui - configures the main window and all the widgets.
 **scanner:** Read the circuit definition file and translate the characters into symbols.\
 **devices.py:** Make devices and set device properties.\
 **userint.py:** Implement the interactive command line user interface.
+
+## Getting Started
+
+### Dependencies
+
+* Look up to **requirements.txt**
+
+
 
